@@ -1,0 +1,7 @@
+5
+GRANT ALL PRIVILEGES ON *.* TO test@localhost IDENTIFIED BY 'test';
+SELECT * FROM m, n;
+SELECT * FROM m INNER JOIN n ON m.id = n.id;
+select e.ename, e.sal, d.dname from dept d left outer join emp e on e.deptno=d.deptno;
+select e.ename, e.sal, d.dname from emp e right outer join dept d on e.deptno=d.deptno;
+
