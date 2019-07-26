@@ -1,3 +1,6 @@
+#ifndef _CONNECTOR_H_
+#define _CONNECTOR_H_
+
 #include "simple_conn.h"
 #include "../config/config.h"
 #include <vector>
@@ -35,3 +38,5 @@ public:
 	void close();
 
 };
+
+#endif

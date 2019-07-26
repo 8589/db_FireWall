@@ -1,3 +1,6 @@
+#ifndef _DB_COMM_H_
+#define _DB_COMM_H_
+
 #include "../simple_comm/simple_comm.h"
 #include "../filter/filter.h"
 #include <vector>
@@ -15,12 +18,12 @@ private:
 	logger log;
 	string user;
 	sockaddr_in client_addr;
-	int mode;	//learing or prtection mode
+	bool mode;	//learing or prtection mode
 
 public:
 	//sql_comm();
-	db_comm(int client_fd, int mysql_port, sockaddr_in _client_addr, int _mode):
-		client_fd(client_fd),db_port(mysql_port),client_addr(_client_addr),mode(_mode){}
+	db_comm(int client_fd, int _db_port, sockaddr_in _client_addr, bool _mode):
+		client_fd(client_fd),db_port(_db_port),client_addr(_client_addr),mode(_mode){}
 	~db_comm()
 	{
 		server.close_socket(this->client_fd, &(this->client_addr));
@@ -43,3 +46,5 @@ public:
 
 	
 };
+
+#endif

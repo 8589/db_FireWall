@@ -1,3 +1,6 @@
+#ifndef _SIMPLE_CONN_H_
+#define _SIMPLE_CONN_H_
+
 #include <string.h>
 #include <vector>
 #include <mysql/mysql.h>
@@ -27,7 +30,7 @@ public:
 };
 
 
-
+#endif
 
 
 

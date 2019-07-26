@@ -1,3 +1,6 @@
+#ifndef _SIMPLE_COMM_H_
+#define _SIMPLE_COMM_H_
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -7,13 +10,12 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include "../logger/logger.h"
+#include "../config/config.h"
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstdlib>
 
-#define	MAX_MSG_SIZE 16777215
-#define BUFFSIZE 4096
-#define MSGSIZE 1024
+
 class simple_comm
 {
 	char buff[BUFFSIZE];
@@ -54,3 +56,6 @@ public:
 	int get_socket();
 
 };
+
+
+#endif

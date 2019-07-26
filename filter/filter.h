@@ -1,6 +1,8 @@
+#ifndef _FILTER_H_
+#define _FILTER_H_
+
 #include "../connector/connector.h"
 #include "../sql_parser/sql_parser.h"
-#include "../config/config.h"
 #include <string>
 #include <sstream>
 using namespace std;
@@ -34,3 +36,5 @@ public:
 	void parse_sql_level_4(string _sql, string &rule);
 
 };
+
+#endif

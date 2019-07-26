@@ -1,3 +1,6 @@
+#ifndef _SQL_PARSER_H_
+#define _SQL_PARSER_H_
+
 #include "FlexLexer.h"
 #include <iostream> 
 #include <string> 
@@ -15,3 +18,5 @@ public:
 	virtual void LexerError(const char* msg);
 	virtual ~sql_parser() {}
 };
+
+#endif
