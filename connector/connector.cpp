@@ -37,15 +37,30 @@ bool connector::query_rule(string rule)
 	return ans.size();
 }
 */
-bool connector::query_rule(string user, string rule, string ip)
+
+bool connector::query_rule_in_white_list(string user, string rule, string ip)
 {
 	vector<vector<string> > ans;
 	char query_sql[BUFFSIZE];
 	memset(query_sql,0,sizeof(query_sql));
-	sprintf(query_sql, "select rule from white_list where rule=\"%s\" and flag=1 and ((level&4) or addr_ip=\"%s\") and ((level&8) or user=\"%s\");", 
+	sprintf(query_sql, "select count(*) from white_list where rule=\"%s\" and ((level&4) or addr_ip=\"%s\") and ((level&8) or user=\"%s\") and (flag&1);", 
 		rule.c_str(),ip.c_str(),user.c_str());
 	ans = (this->sc).query(query_sql);
-	return ans.size();
+	if(atoi(ans[0][0].c_str()))
+		return true;
+	return false;
+}
+bool connector::query_rule_in_black_list(string user, string rule, string ip)
+{
+	vector<vector<string> > ans;
+	char query_sql[BUFFSIZE];
+	memset(query_sql,0,sizeof(query_sql));
+	sprintf(query_sql, "select count(*) from white_list where rule=\"%s\" and ((level&4) or addr_ip=\"%s\") and ((level&8) or user=\"%s\") and (flag&2);", 
+		rule.c_str(),ip.c_str(),user.c_str());
+	ans = (this->sc).query(query_sql);
+	if(atoi(ans[0][0].c_str()))
+		return true;
+	return false;
 }
 
 bool connector::query_sql(string user, string sql, int level, string ip)
@@ -53,10 +68,38 @@ bool connector::query_sql(string user, string sql, int level, string ip)
 	vector<vector<string> > ans;
 	char query_sql[BUFFSIZE];
 	memset(query_sql, 0, sizeof(query_sql));
-	sprintf(query_sql, "select user,sql_cmd, level, addr_ip from white_list where user=\"%s\" and sql_cmd=\"%s\" and level=%d and addr_ip=\"%s\";", 
+	sprintf(query_sql, "select count(*) from white_list where user=\"%s\" and sql_cmd=\"%s\" and (level&7)=%d and addr_ip=\"%s\";", 
 		user.c_str(), sql.c_str(), level, ip.c_str());
 	ans = (this->sc).query(query_sql);
-	return ans.size();
+	return atoi(ans[0][0].c_str());
+}
+
+
+
+//flag=1 insert to white list
+//flag=2 insert to black list
+void connector::insert_to_a_list(string user, string sql, int level, string ip, int flag)
+{
+	char query_sql[BUFFSIZE];
+	memset(query_sql,0,sizeof(query_sql));
+	sprintf(query_sql, "update white_list set level=%d, flag=flag|%d where sql_cmd=\"%s\" and level&7=%d&7 and user=\"%s\" and addr_ip=\"%s\";",
+		level, flag, sql.c_str(), level, user.c_str(), ip.c_str());
+	this->remove_from_a_list(user, sql, ip, flag);
+	printf("%s\n", query_sql);
+	(this->sc).query(query_sql);
+}
+
+
+//flag=1 remove from white list
+//flag=2 remove from black list
+void connector::remove_from_a_list(string user, string sql, string ip, int flag)
+{
+	char query_sql[BUFFSIZE];
+	memset(query_sql,0,sizeof(query_sql));
+	sprintf(query_sql, "update white_list set flag=flag&%d where sql_cmd=\"%s\" and user=\"%s\" and addr_ip=\"%s\";",
+		3-flag, sql.c_str(), user.c_str(), ip.c_str());
+	printf("%s\n", query_sql);
+	(this->sc).query(query_sql);
 }
 
 

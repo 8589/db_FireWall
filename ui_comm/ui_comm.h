@@ -2,6 +2,7 @@
 #define _UI_COMM_H_
 
 #include "../simple_comm/simple_comm.h"
+#include "../connector/connector.h"
 
 
 extern atomic<bool> is_learning;
@@ -14,6 +15,7 @@ private:
 	int db_port;
 	logger log;
 	char buff[BUFFSIZE];
+	connector conn;
 public:
 	ui_comm(int _client, int _db_port):client_fd(_client),db_port(_db_port){};
 
@@ -23,7 +25,7 @@ public:
 
 	void switch_mode(string& msg);
 
-	void insert_to_white_list(string& msg);
+	void update_a_rule(string& msg);
 
 	int recv_a_packet(string& recv_msg, int _socket_);
 

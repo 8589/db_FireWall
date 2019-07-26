@@ -10,6 +10,9 @@
 12.函数当作col
 
 
+修改sql语句，时用parse之后的语句作为标准语句，去除双引号
+
+
 
 
 
@@ -30,7 +33,47 @@ ui_comm协议
 			第6个byte为1表示开为0表示，2表示查询，其他不处理
 		2表示插入规则
 			第6个byte表示等级，包括sql语句的过滤等级和user，ip是否通配低，其中三位表示过滤等级(level%8),第4位表示user是否通配，第5位表示ip是否通配
+			第7个byte表示操作类型，第1位表示白(1)黑(0)名单，第2位表示加入(1)，删除(0)
 			之后的byte表示sql语句
 		其他待定
 	服务器端：
 		一个byte，0失败，1成功
+
+
+
+
+
+level
+	123.过略等级
+	4.ip是否通配
+	5.user是否通配
+
+
+flag
+	1.是否白名单
+	2.是否移除白名单
+	3.是否黑名单
+	4.是否移除黑名单
+
+
+flag
+	1.是否白名单
+		1.移入白名单
+			update white_list set flag=flag&2 where sql_cmd=sql;(全部移除白名单)
+			update white_list set level=level, flag=flag|1 where sql_cmd=sql and level&7=level;
+		2.移除白名单
+			update white_list set flag=flag&2 where sql_cmd=sql;
+	2.是否黑名单
+		1.移入黑名单
+			update white_list set flag=flag&1 where sql_cmd=sql;(全部移除黑名单)
+			update white_list set level=level, flag=flag|2 where sql_cmd=sql and level&7=level;
+		2.移除黑名单
+			update white_list set flag=flag&1 where sql_cmd=sql;
+
+
+
+
+
+过滤
+	黑名单
+		select count(*) from white_list where rule=\"%s\" and ((level&4) or addr_ip=\"%s\") and ((level&8) or user=\"%s\") and (flag&2);
