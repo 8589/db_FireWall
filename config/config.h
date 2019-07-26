@@ -1,8 +1,21 @@
-#define BUFFSIZE	4096
+#ifndef _CONFIG_H_
+#define _CONFIG_H_
+
+#include <atomic>
 
 
-#define COL 		2001
-#define TAB 		2002
+
+extern std::atomic<bool> is_learning;
+
+
+
+#define	MAX_MSG_SIZE 	16777215
+#define MSGSIZE 		1024
+#define BUFFSIZE		4096
+
+
+#define COL 			2001
+#define TAB 			2002
 
 
 
@@ -197,3 +210,7 @@
 #define OUTER 		159
 
 #define OTHER 		999
+
+
+
+#endif

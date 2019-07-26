@@ -1,4 +1,5 @@
-
+#ifndef _LOGGER_H_
+#define _LOGGER_H_
 #include <cstdio>
 #include <string>
 using namespace std;
@@ -17,3 +18,5 @@ public:
 	
 
 };
+
+#endif
