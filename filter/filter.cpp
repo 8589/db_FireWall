@@ -21,7 +21,13 @@ bool filter::is_legal_and_add_log(string user, string _sql, string ip)
 	{
 		this->parse_sql(_sql, i, rule);	
 		(this->conn).connect_to_db();
-		if((this->conn).query_rule(user, rule, ip))
+		if((this->conn).query_rule_in_black_list(user, rule, ip))
+		{
+			(this->conn).add_illegal_query(user, _sql, ip);
+			(this->conn).close();
+			return false;	
+		}
+		if((this->conn).query_rule_in_white_list(user, rule, ip))
 			return true;
 	}
 	(this->conn).add_illegal_query(user, _sql, ip);
@@ -63,7 +69,8 @@ void filter::add_white_list(string user, string _sql, int level, string ip)
 	}
 	string rule;
 	this->parse_sql(_sql, level, rule);
-	if(rule == "col")
+	//if the sql just is a table name or column name
+	if(rule == "col" || rule == "tab")
 	{
 		(this->conn).close();
 		return;

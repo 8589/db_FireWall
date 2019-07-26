@@ -24,7 +24,7 @@ void ui_comm::handle_packet(string& msg)
 		//insert a rule
 		else if(msg[4] == '\2')
 		{
-			this->insert_to_white_list(msg);
+			this->update_a_rule(msg);
 		}
 		//remaining
 		else
@@ -75,20 +75,42 @@ void ui_comm::switch_mode(string& msg)
 	}
 }
 
-void ui_comm::insert_to_white_list(string& msg)
+void ui_comm::update_a_rule(string& msg)
 {
-	printf("insert a rule\n");
-	if(msg.size() >= 6)
+
+	printf("update a rule\n");
+	if(msg.size() >= 7)
 	{
 		int level = msg[5];
-		printf("level: %d\n", level%8);
-		printf("addr_ip: %d\n", level&(1<<3));
-		printf("user: %d\n", level&(1<<4));
-		printf("sql: %s\n", string(msg, 6, msg.size()-6).c_str());
+		int update = msg[6];
+		string user = string(msg, 7, 30);
+		string addr_ip = string(msg, 7+30, 30);
+		string sql = string(msg, 7+30+30, msg.size()-7-30-30);
+		printf("user: %s\n", user.c_str());
+		printf("addr_ip: %s\n", addr_ip.c_str());
+		printf("level: %d\n", level);
+		printf("update: %d\n", update);
+		printf("sql: %s\n", sql.c_str());
+		(this->conn).connect_to_db();
+		if(update && 2)
+		{
+			(this->conn).insert_to_a_list(user, sql, level, addr_ip, (update&1)+1);
+		}
+		else
+		{
+			(this->conn).remove_from_a_list(user, sql, addr_ip, (update&1)+1);
+		}
+		(this->conn).close();
 		this->send_result(1);
+		printf("####\n");
 	}
-	this->send_result(0);
+	else
+	{
+		this->send_result(0);
+	}
 }
+
+
 
 
 int ui_comm::recv_a_packet(string& recv_msg, int _socket_)
