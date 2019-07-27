@@ -132,15 +132,15 @@ void connector::add_white_list(string user, string _sql, string rule, int level,
 }
 
 
-
-
 void connector::add_illegal_query(string user, string sql_cmd, string ip)
 {
 	char query_sql[BUFFSIZE];
 	memset(query_sql,0,sizeof(query_sql));
-	sprintf(query_sql, "insert into illegal_query(user, query_sql, ip) values('%s','%s','%s');",user.c_str(), sql_cmd.c_str(), ip.c_str());
+	sprintf(query_sql, "insert into illegal_query(user, query_sql, addr_ip) values(\"%s\",\"%s\",\"%s\");",user.c_str(), sql_cmd.c_str(), ip.c_str());
 	(this->sc).query(query_sql);
 }
+
+
 
 unsigned long long connector::hash(string user, string sql)
 {

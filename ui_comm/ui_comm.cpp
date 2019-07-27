@@ -43,6 +43,7 @@ void ui_comm::switch_mode(string& msg)
 		{
 			printf("on\n" );
 			is_learning.store(true);
+			printf("!!!is_learning: %d\n", is_learning.load());
 			this->send_result(1);
 		}
 		else if(msg[5] == '\0')

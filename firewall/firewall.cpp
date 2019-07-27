@@ -12,6 +12,7 @@ void firewall::start_firewall()
 	while(1){
 		sockaddr_in client_addr;
 		int client = server.accept_client(&client_addr);
+		printf("is_learning: %d\n", is_learning.load());
 		thread t([](int _client, int port, sockaddr_in _client_addr, bool _mode){
 			db_comm dc(_client, port, _client_addr, _mode);
 			dc.handle_db_connection();

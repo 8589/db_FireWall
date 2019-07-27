@@ -29,10 +29,10 @@ void db_comm::login()
 	//from client
 	_size = server.recv_msg(this->client_fd);
 	server.read_msg(this->buff);
-	log.debug("@@@@@@@@@@@@@user@@@@@@@@@@@@@@@@@@@@\n");
+	//log.debug("@@@@@@@@@@@@@user@@@@@@@@@@@@@@@@@@@@\n");
 	this->user = string(this->buff+36);
 	log.high_debug(string("user: ") + this->user);
-	log.debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+	//log.debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
 
 	//to server
 	server.send_msg(this->buff, _size);
@@ -52,8 +52,8 @@ void db_comm::login()
 
 int db_comm::one_comm()
 {
-	this->client_to_server();
-	return  this->server_to_client();
+	
+	return  this->client_to_server() && this->server_to_client();
 }
 
 int db_comm::hanlde_illegal_query()
@@ -94,11 +94,10 @@ int db_comm::client_to_server()
 				return this->hanlde_illegal_query();
 			}
 		}
-		
 	}
 	//to server
 	server.send_msg(recv_msg.c_str(), recv_msg.size());
-	return packet_size;
+	return 1;
 }
 
 int db_comm::server_to_client()
