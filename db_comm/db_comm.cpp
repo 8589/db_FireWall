@@ -83,7 +83,6 @@ int db_comm::client_to_server()
 		//printf("%s\n", sql.c_str());
 
 		//to open filter
-		
 		filter f;
 		if(this->mode){
 			f.add_white_list_n_times(this->user, sql, 4, string(inet_ntoa((this->client_addr).sin_addr)));
@@ -94,7 +93,7 @@ int db_comm::client_to_server()
 				return this->hanlde_illegal_query();
 			}
 		}
-	}
+}
 	//to server
 	server.send_msg(recv_msg.c_str(), recv_msg.size());
 	return 1;
