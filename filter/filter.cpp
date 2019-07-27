@@ -64,15 +64,17 @@ void filter::add_white_list(string _sql, int level)
 */
 void filter::add_white_list(string user, string _sql, int level, string ip)
 {
+	string _sql_;
+	this->parse_sql(_sql, 1, _sql_);
 	(this->conn).connect_to_db();
-	if((this->conn).query_sql(user, _sql, level, ip))
+	if((this->conn).query_sql(user, _sql_, level, ip))
 	{
 		(this->conn).close();
 		return;
 	}
 	string rule;
 	this->parse_sql(_sql, level, rule);
-	(this->conn).add_white_list(user, _sql, rule, level, ip);
+	(this->conn).add_white_list(user, _sql_, rule, level, ip);
 	(this->conn).close();
 }
 
@@ -80,6 +82,7 @@ void filter::add_white_list(string user, string _sql, int level, string ip)
 
 void filter::add_white_list_n_times(string user, string _sql, int n, string ip)
 {
+
 	for(int i=1; i<=n; i++)
 	{
 		this->add_white_list(user, _sql, i, ip);
@@ -143,7 +146,22 @@ void filter::parse_sql_level_1(string _sql, string &rule)
 	{
 		if(ret == EMPTY)
 			rule += " ";			//ss << " " ;
-			
+		
+		else if(ret == STRING)
+		{
+			string str(sp->YYText());
+			string s;
+			for(int i=0;i<str.size();i++)
+			{
+				if(str[i] == '\\')
+					s += "\\\\";
+				else if(str[i]=='\"')
+					s +="\\\"";
+				else
+					s += str[i];
+			}
+			rule += s;
+		}
 		else
 			rule += (sp->YYText());			//ss << (sp->YYText());
 			

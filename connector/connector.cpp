@@ -70,6 +70,7 @@ bool connector::query_sql(string user, string sql, int level, string ip)
 	memset(query_sql, 0, sizeof(query_sql));
 	sprintf(query_sql, "select count(*) from white_list where user=\"%s\" and sql_cmd=\"%s\" and (level&7)=%d and addr_ip=\"%s\";", 
 		user.c_str(), sql.c_str(), level, ip.c_str());
+	printf("@@@%s\n", query_sql);
 	ans = (this->sc).query(query_sql);
 	return atoi(ans[0][0].c_str());
 }
@@ -128,6 +129,7 @@ void connector::add_white_list(string user, string _sql, string rule, int level,
 	memset(query_sql,0,sizeof(query_sql));
 	sprintf(query_sql, "insert into white_list values(\"%s\",\"%s\",\"%s\",%d,\"%s\",%d);",
 		user.c_str(), _sql.c_str(), rule.c_str(), level, ip.c_str(), 0);
+	printf("###%s\n", query_sql);
 	(this->sc).query(query_sql);
 }
 
