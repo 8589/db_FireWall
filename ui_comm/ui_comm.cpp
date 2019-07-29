@@ -1,14 +1,11 @@
 #include "ui_comm.h"
 
 
-
-
-
 void ui_comm::handle_ui_connection()
 {
 	string msg;
 	this->recv_a_packet(msg, this->client_fd);
-	printf("###%lu\n",msg.size());
+	//printf("###%lu\n",msg.size());
 	this->handle_packet(msg);
 }
 
@@ -29,57 +26,55 @@ void ui_comm::handle_packet(string& msg)
 		//remaining
 		else
 		{
-			printf("nothing\n");
+			log.debug("do nothing!");
 		}
 	}
 }
 
 void ui_comm::switch_mode(string& msg)
 {
-	printf("switch mode\n");
+	log.debug("switch mode");
 	if(msg.size() >= 6)
 	{
 		if(msg[5] == '\1')
 		{
-			printf("on\n" );
+			log.debug("on");
 			is_learning.store(true);
-			printf("!!!is_learning: %d\n", is_learning.load());
 			this->send_result(1);
 		}
 		else if(msg[5] == '\0')
 		{
-			printf("off\n");
+			log.debug("off");
 			is_learning.store(false);
 			this->send_result(1);
 		}
 		else if(msg[5] == '\2')
 		{
-			printf("query mode\n");
+			log.debug("query mode");
 			this->send_result(is_learning.load());
 		}
 		else if(msg[5] == '\4')
 		{
-			printf("just switch\n");
+			log.debug("just switch");
 			is_learning.store(is_learning.load()^1);
 			this->send_result(is_learning.load());
 		}
 		else
 		{
-			printf("fff\n");
+			log.debug("switch mode -> nothing");
 			this->send_result(1);
 		}
 	}
 	else
 	{
-		printf("kkk\n");
+		log.debug("switch mode -> no info for what to do");
 		this->send_result(0);
 	}
 }
 
 void ui_comm::update_a_rule(string& msg)
 {
-
-	printf("update a rule\n");
+	log.debug("update a rule");
 	if(msg.size() >= 7)
 	{
 		int level = msg[5];
@@ -87,11 +82,11 @@ void ui_comm::update_a_rule(string& msg)
 		string user = string(msg, 7, 30);
 		string addr_ip = string(msg, 7+30, 30);
 		string sql = string(msg, 7+30+30, msg.size()-7-30-30);
-		printf("user: %s\n", user.c_str());
-		printf("addr_ip: %s\n", addr_ip.c_str());
-		printf("level: %d\n", level);
-		printf("update: %d\n", update);
-		printf("sql: %s\n", sql.c_str());
+
+		char msg[MSGSIZE];
+		sprintf(msg, "user: %s\naddr_ip:%s\nlevel: %d\nupdate: %d\nsql: %s\n",user.c_str(), addr_ip.c_str(), level,update,sql.c_str());
+		log.high_debug(msg);
+
 		(this->conn).connect_to_db();
 		if(update && 2)
 		{
@@ -103,7 +98,6 @@ void ui_comm::update_a_rule(string& msg)
 		}
 		(this->conn).close();
 		this->send_result(1);
-		printf("####\n");
 	}
 	else
 	{

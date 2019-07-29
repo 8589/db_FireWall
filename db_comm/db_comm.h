@@ -11,13 +11,13 @@ using namespace std;
 class db_comm
 {
 private:
-	simple_comm server;
-	int client_fd;
-	int db_port;
-	char buff[BUFFSIZE];
-	logger log;
-	string user;
-	sockaddr_in client_addr;
+	simple_comm server;		//handle network communication operation
+	int client_fd;			//the fd of the client socket
+	int db_port;			//the db server port
+	char buff[BUFFSIZE];	//the buff to receive packet
+	logger log;				// log
+	string user;			// client user
+	sockaddr_in client_addr;	//get the ip of client
 	bool mode;	//learing or prtection mode
 
 public:
@@ -44,7 +44,6 @@ public:
 
 	int recv_a_packet(string& recv_msg, int _socket_);
 
-	
 };
 
 #endif

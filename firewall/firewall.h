@@ -14,10 +14,10 @@ class firewall
 {
 public:
 
-	void start_firewall();
+	void start_firewall(int db_server_port=3306, int firewall_port=6666);
 
+	void comm_with_web_UI(int db_server_port=3306, int ui_comm_port=6667);
 
-	void comm_with_web_UI();
 };
 
 #endif
