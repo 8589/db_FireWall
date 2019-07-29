@@ -1,3 +1,68 @@
+//使用方法
+1.编译词法分析器
+	cd sql_parser
+	./compile.sh
+
+2.安装libmysql-dev
+	sudo apt-get install libmysqld-dev
+
+3.创建数据库
+	./pre_compile.sh
+	./pre_op_before_run
+
+4.编译运行防火墙
+	./compile.sh
+	./main
+
+
+//配置文件是db_FireWall.json
+server_port是数据库服务器的端口,默认3306
+firewall_port是防火墙监听端口,默认6666
+ui_comm_port是与web ui通信的端口，默认6667
+is_learning否开启学习模式，1位是，0为否
+
+
+
+
+//客户端连接数据库时指定主机和端口号
+//-h 		指定服务器主机
+//-P(大写) 	指定服务器端口
+//-u 		指定用户
+//-p 		密码
+mysql -h127.0.0.1 -P6666 -uroot -p
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //待解决
 1.过滤策略(待优化)
@@ -21,7 +86,10 @@
 
 
 
+//环境问题
+
 1.重新编译sql_parser
+2.创建数据库
 2.修改db_comm里面的eof_cnt，高版本为1，低版本和navigation for mysql 为2
 
 

@@ -70,7 +70,7 @@ bool connector::query_sql(string user, string sql, int level, string ip)
 	memset(query_sql, 0, sizeof(query_sql));
 	sprintf(query_sql, "select count(*) from white_list where user=\"%s\" and sql_cmd=\"%s\" and (level&7)=%d and addr_ip=\"%s\";", 
 		user.c_str(), sql.c_str(), level, ip.c_str());
-	printf("@@@%s\n", query_sql);
+	//printf("@@@%s\n", query_sql);
 	ans = (this->sc).query(query_sql);
 	return atoi(ans[0][0].c_str());
 }
@@ -86,7 +86,7 @@ void connector::insert_to_a_list(string user, string sql, int level, string ip, 
 	sprintf(query_sql, "update white_list set level=%d, flag=flag|%d where sql_cmd=\"%s\" and level&7=%d&7 and user=\"%s\" and addr_ip=\"%s\";",
 		level, flag, sql.c_str(), level, user.c_str(), ip.c_str());
 	this->remove_from_a_list(user, sql, ip, flag);
-	printf("%s\n", query_sql);
+	//printf("%s\n", query_sql);
 	(this->sc).query(query_sql);
 }
 
@@ -99,7 +99,7 @@ void connector::remove_from_a_list(string user, string sql, string ip, int flag)
 	memset(query_sql,0,sizeof(query_sql));
 	sprintf(query_sql, "update white_list set flag=flag&%d where sql_cmd=\"%s\" and user=\"%s\" and addr_ip=\"%s\";",
 		3-flag, sql.c_str(), user.c_str(), ip.c_str());
-	printf("%s\n", query_sql);
+	//printf("%s\n", query_sql);
 	(this->sc).query(query_sql);
 }
 
@@ -129,7 +129,7 @@ void connector::add_white_list(string user, string _sql, string rule, int level,
 	memset(query_sql,0,sizeof(query_sql));
 	sprintf(query_sql, "insert into white_list values(\"%s\",\"%s\",\"%s\",%d,\"%s\",%d);",
 		user.c_str(), _sql.c_str(), rule.c_str(), level, ip.c_str(), 0);
-	printf("###%s\n", query_sql);
+	//printf("###%s\n", query_sql);
 	(this->sc).query(query_sql);
 }
 

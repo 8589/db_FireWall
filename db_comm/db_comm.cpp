@@ -1,6 +1,12 @@
 #include "db_comm.h"
 #include <cstring>
 
+
+//Summary: handle a connection from a db client
+
+//Parameters:
+
+//Return : 
 void db_comm::handle_db_connection()
 {
 	server.create_socket(AF_INET, SOCK_STREAM, 0);
@@ -13,6 +19,11 @@ void db_comm::handle_db_connection()
 }
 
 
+//Summary: imitate the login
+
+//Parameters:
+
+//Return : 
 void db_comm::login()
 {
 	//to server
@@ -50,12 +61,24 @@ void db_comm::login()
 
 }
 
+
+//Summary: finish a complete communication that send query sql from db client and receive query result from db server
+
+//Parameters:
+
+//Return : if the communication is finish,return 1. others such as close the connection or a illegal query will return 0
 int db_comm::one_comm()
 {
 	
 	return  this->client_to_server() && this->server_to_client();
 }
 
+
+//Summary: how to handle a illegal query. this func can rewrite by the requirement
+
+//Parameters:
+
+//Return : just return 0;
 int db_comm::hanlde_illegal_query()
 {
 	log.warning("a illegal query\n");
@@ -64,7 +87,11 @@ int db_comm::hanlde_illegal_query()
 
 
 
+//Summary: get a query packet from db client and send them to db server
 
+//Parameters:
+
+//Return : if the filter is learning mode or the filter is protect mode and the query sql is legal the func will return 1, others will return 0
 int db_comm::client_to_server()
 {
 	//from client
@@ -99,6 +126,11 @@ int db_comm::client_to_server()
 	return 1;
 }
 
+//Summary: get all result packet from db server and send them to client
+
+//Parameters:
+
+//Return : the size of all packet from db server to db client
 int db_comm::server_to_client()
 {
 	//from server
@@ -128,17 +160,27 @@ int db_comm::server_to_client()
 }
 
 
+
+//Summary: receive a complete packet
+
+//Parameters:
+
+//       recv_msg:a reference of string type to store the content of packet
+//       _socket_ : the socket you want to recerve a packet
+
+//Return : real msg size, not the size of recv_msg
 int db_comm::recv_a_packet(string& recv_msg, int _socket_)
 {
 	recv_msg.clear();
+	//get the size of this packet
 	int _size = server.recv_msg(_socket_, 4);
 	if(!_size)	return 0;
 	server.read_msg(this->buff, _size);
 
-
+	//get the size of real msg 
 	unsigned int msg_size = (*((unsigned int*)buff))&(0x00ffffffu);
 
-
+	//get the size of real packet
 	unsigned int total_msg_size = msg_size + 4;
 	recv_msg = string(this->buff,this->buff+_size);
 	unsigned int _recv_size = _size;

@@ -31,7 +31,6 @@ public:
 
 	void send_result(char result);
 
-	
 };
 
 #endif
