@@ -2,11 +2,15 @@
 #define _CONFIG_H_
 
 #include <atomic>
+#include <string>
 
 
 
 extern std::atomic<bool> is_learning;
 extern int LOG_LEVEL;
+extern std::string db_user;
+extern std::string db_password;
+extern std::string db_name;
 
 
 

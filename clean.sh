@@ -1,2 +1,2 @@
 #!/bin/bash
-rm -rf main
+rm -rf db_FireWall

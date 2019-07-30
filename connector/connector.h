@@ -7,7 +7,9 @@
 #include <string>
 using namespace std;
 
-
+extern std::string db_user;
+extern std::string db_password;
+extern std::string db_name;
 class connector
 {
 private:
