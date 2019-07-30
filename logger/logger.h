@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <string>
 using namespace std;
-#define LOG_LEVEL 2
+extern int LOG_LEVEL;
 class logger
 {
 public:
@@ -14,8 +14,6 @@ public:
 	void high_debug(string msg);
 
 	void debug(string msg);
-
-	
 
 };
 
