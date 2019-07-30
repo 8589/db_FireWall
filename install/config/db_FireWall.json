@@ -1,0 +1,13 @@
+{
+"server_port":3306,
+
+"firewall_port":6666,
+"ui_comm_port":6667,
+
+"is_learning":1,
+
+"LOG_LEVEL":0,
+"db_user":"root",
+"db_password":"123456",
+"db_name":"LL_firewall"
+}
