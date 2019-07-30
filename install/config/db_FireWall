@@ -1,0 +1,40 @@
+#!/bin/bash
+
+start(){
+echo "start"
+nohup /bin/db_FireWall > /etc/db_FireWall/db_FireWall.log 2>&1 &
+echo "db_FireWall start"
+}
+
+stop(){
+pid=`ps -ef|grep db_FireWall|grep -v 'grep --color=auto db_FireWall'|grep -v 'grep db_FireWall'|awk '{print $2}'`
+for i in $pid
+do      
+        process=`ps -ef|grep ${i}|awk '{print $8}'`
+        for j in $process
+        do      
+                if [ "$j" = "/bin/db_FireWall" ]; then
+	                kill -9 $i
+                fi
+        done
+done
+}
+
+
+case "$1" in
+'star't)
+	start
+	;;
+'stop')
+	stop
+	;;
+'restart')
+	stop
+	start
+	;;
+*)
+	echo "Usage:$0 start|stop|restart"
+	;;
+esac
+exit $?
+	
