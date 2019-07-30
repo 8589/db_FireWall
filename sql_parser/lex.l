@@ -195,6 +195,8 @@ using namespace std;
 #define TAB_DOT_COL	158
 #define OUTER 		159
 
+#define GRANTS 		160
+
 
 
 #define OTHER 		999
@@ -213,6 +215,7 @@ using namespace std;
 \'(\\\'|[^'])*\'				{return STRING;}
 [.] 							{return DOT;}
 (?i:CREATE)						{return CREATE;}
+(?i:GRANTS)						{return GRANTS;}
 (?i:DROP)						{return DROP;}
 (?i:USE)						{return USE;}
 (?i:INSERT)						{return INSERT;}

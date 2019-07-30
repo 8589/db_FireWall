@@ -33,6 +33,19 @@ void db_comm::login()
 	int _size = server.recv_msg();
 	server.read_msg(this->buff);
 
+	this->eof_num = ((*(int*)(this->buff+16))&(0x00ffff00) & 0x00000400)?1:2;
+	/*
+	this->eof_num = (*(int*)(this->buff+16))&(0x03ffff00);
+	printf("eof_num: %d\n", this->eof_num);
+	for(int i=0x00000100;i<0x04000000;i=i<<1)
+	{
+		if(this->eof_num & i)
+			printf("1\n");
+		else 
+			printf("0\n");
+	}
+	*/
+
 	//to client
 	server.send_msg(this->client_fd, this->buff, _size);
 
@@ -44,6 +57,24 @@ void db_comm::login()
 	this->user = string(this->buff+36);
 	log.high_debug(string("user: ") + this->user);
 	//log.debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+
+	//this->eof_num = ((*(int*)(this->buff))&(0x0000ffff) & 0x00000200)?1:2;
+
+
+	//get the count of the eof packet in the result packet
+	if(this->eof_num == 1)
+		this->eof_num = (((*(int*)(this->buff))&(0x0000ffff) & 0x00000004)?1:2);
+
+	/*
+	printf("eof_num: %d\n", this->eof_num);
+	for(int i=0x00000001;i<0x00040000;i=i<<1)
+	{
+		if(this->eof_num & i)
+			printf("1\n");
+		else 
+			printf("0\n");
+	}
+	*/
 
 	//to server
 	server.send_msg(this->buff, _size);
@@ -140,7 +171,7 @@ int db_comm::server_to_client()
 	string all_recv_msg = recv_msg;
 	if(recv_msg.size() > 4 && recv_msg[4] != (char)0x00 && recv_msg[4] != (char)0xff && recv_msg[4] != (char)0xfe)
 	{
-		int eof_cnt = 1;
+		int eof_cnt = this->eof_num;
 		while(eof_cnt)
 		{
 			packet_size = this->recv_a_packet(recv_msg, server.get_socket());

@@ -209,6 +209,8 @@ extern std::atomic<bool> is_learning;
 #define TAB_DOT_COL	158
 #define OUTER 		159
 
+#define GRANTS 		160
+
 #define OTHER 		999
 
 
