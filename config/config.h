@@ -6,6 +6,7 @@
 
 
 extern std::atomic<bool> is_learning;
+extern int LOG_LEVEL;
 
 
 

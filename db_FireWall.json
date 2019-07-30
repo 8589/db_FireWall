@@ -4,6 +4,8 @@
 "firewall_port":6666,
 "ui_comm_port":6667,
 
-"is_learning":1
+"is_learning":1,
+
+"LOG_LEVEL":0
 
 }

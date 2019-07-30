@@ -2,10 +2,12 @@
 #include "./utils/CJsonObject.hpp"
 #include <thread>
 #include <fstream>
+#include <dlfcn.h>
 using namespace std;
 using namespace neb;
 
 extern atomic<bool> is_learning;
+extern int LOG_LEVEL;
 
 int main()
 {
@@ -52,8 +54,9 @@ int main()
 
 	int _is_learning;
 	oJson.Get("is_learning", _is_learning);
-
 	is_learning.store(bool(_is_learning));
+
+	oJson.Get("LOG_LEVEL", LOG_LEVEL);
 
 	thread t1([&,server_port, firewall_port, ui_comm_port](){
 		firewall fw;
