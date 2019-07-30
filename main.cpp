@@ -8,11 +8,13 @@ using namespace neb;
 
 extern atomic<bool> is_learning;
 extern int LOG_LEVEL;
-
+extern std::string db_user;
+extern std::string db_password;
+extern std::string db_name;
 int main()
 {
 	logger log;
-	ifstream fin("db_FireWall.json");
+	ifstream fin("/etc/db_FireWall/db_FireWall.json");
 	string json;
 	string _s;
 	while(getline(fin, _s))
@@ -57,6 +59,12 @@ int main()
 	is_learning.store(bool(_is_learning));
 
 	oJson.Get("LOG_LEVEL", LOG_LEVEL);
+
+
+	oJson.Get("db_user", db_user);
+	oJson.Get("db_password", db_password);
+	oJson.Get("db_name",db_name);
+
 
 	thread t1([&,server_port, firewall_port, ui_comm_port](){
 		firewall fw;

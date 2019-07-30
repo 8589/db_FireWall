@@ -7,7 +7,7 @@ using namespace std;
 
 void connector::connect_to_db()
 {
-	(this->sc).connect_to("127.0.0.1","root","123456","LL_firewall");
+	(this->sc).connect_to("127.0.0.1",db_user.c_str(),db_password.c_str(),db_name.c_str());
 }
 
 /*
