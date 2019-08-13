@@ -32,17 +32,83 @@ is_learning否开启学习模式，1位是，0为否
 mysql -h127.0.0.1 -P6666 -uroot -p
 
 
+数据库表说明：
+level
+	123.过略等级
+	4.ip是否通配
+	5.user是否通配
+
+
+flag
+	1.是否白名单
+	2.是否移除白名单
+	3.是否黑名单
+	4.是否移除黑名单
+white_list | CREATE TABLE `white_list` (
+  `user` varchar(30) NOT NULL,
+  `sql_cmd` varchar(512) NOT NULL,
+  `rule` varchar(512) NOT NULL,
+  `level` int(5) NOT NULL,
+  `addr_ip` varchar(30) NOT NULL,
+  `flag` int(5) NOT NULL,
+  PRIMARY KEY (`user`,`sql_cmd`,`level`,`addr_ip`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
+
+学习阶段每一条通过的sql语句会生成4条数据库的记录，其中这4条数据库记录的sql_cmd，user，addr_ip是一样的，这四条数据库记录代表4个不同等级过滤规则
+level&7=1即1级表示只有和规则中sql语句完全一样才可以通过
+level&7=2即2级表示规则sql中的一些参数可变，如select * from stu where sid = 1中的1就是可变的
+level&7=3即3级表示规则sql中的列名可变，如select Sid from std中的Sid就可以改变
+level&7=4即4级表示规则sql中的表名可变，如select Sid from std中的std就可变
+低等级可过的高等级必定可过，如果不可过，说明代码写错了。。。。
+
+其中level的第4，5位表示ip，user是否可以通配，即是否所有ip，user可过
+在这4条数据库记录中，level的低三位是不同的而且是不变的，高位是不固定的。
+
+flag用来表示该条规则是在黑名单还是在白名单中，
+如果flag&1 = 1表示在白名单,flag&1 = 0表示不在白名单
+falg&2 = 1表示在黑名单， flag&2 = 0表示不再黑名单
+四条规则中同时只会有一条规则生效，其余三条的flag是0
+生效的一条规则既可以在黑名单也可以在白名单，如果同时属于两个名单，黑名单优先，即优先不通过
+新添加的规则4条记录都默认flag=0，也就是既不在白名单也不再黑名单里，这两者有重复问题，
+所以无法辨别4条flag都位0的记录表示刚插入的规则还是已经被废弃掉的规则
+
+两个解决方法：
+第一个：
+	0的作为新插入的，那么当一条规则被移除白/黑名单时，检测是否4条记录的flag都是0如果时，直接delete4条记录/flag第三位设置成1表示删除
+	缺点：没有回收站，直接删除，无法恢复/暂时没想到太大的问题
+
+第二个：
+	0作为废弃规则，那么当一条规则插入时，设置一个默认的级别，使得新插入的规则有一条记录flag不为0
+	缺点：无法查看新插入的规则
+
+两个方法均为实现。
+
+
+user 			该条规则对应的数据库用户
+sql_cmd 		学习阶段学习到的sql语句
+rule 			根据sql语句生成的规则
+level 			低三位表示过滤等级，第4位表示ip是否通配，第5位表示user是否通配
+addr_ip 		该条规则对应的ip
+flag			用来表示该条规则是在黑名单还是在白名单中，第一位表示是否白名单，第二位表示是否在黑名单
 
 
 
+illegal_query | CREATE TABLE `illegal_query` (
+  `user` varchar(30) NOT NULL,
+  `query_sql` varchar(512) NOT NULL,
+  `addr_ip` varchar(30) NOT NULL,
+  `query_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user`,`query_sql`,`addr_ip`,`query_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
+
+每条记录表示一次非法请求
+user 			表示请求的数据库用户
+query_sql 		表示本次非法请求的sql语句
+addr_ip 		表示本次非法请求的发送方的ip
+query_time 		表示本次非法请求的时间
 
 
-
-
-
-
-
-
+数据库表结构非常烂。。。。大量冗余，浪费空间。结构差劲，浪费时间。
 
 
 
@@ -123,9 +189,7 @@ level
 
 flag
 	1.是否白名单
-	2.是否移除白名单
-	3.是否黑名单
-	4.是否移除黑名单
+	2.是否黑名单
 
 
 flag
