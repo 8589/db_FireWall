@@ -11,6 +11,8 @@ public:
 
 	void warning(string msg);
 
+	void info(string msg);
+
 	void high_debug(string msg);
 
 	void debug(string msg);

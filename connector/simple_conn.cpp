@@ -11,8 +11,9 @@ simple_conn::simple_conn(const char server[],const char user[],const char passwd
 	conn = mysql_init(NULL);
 
 	if (!mysql_real_connect(conn,server,user,passwd,database,0,NULL,CLIENT_MULTI_RESULTS)){
-		fprintf(stderr, "%s\n", mysql_error(conn));
-		exit(1);
+		//fprintf(stderr, "%s\n", mysql_error(conn));
+		//exit(1);
+		this->log.error(mysql_error(conn));
 	}
 }
 
@@ -28,8 +29,9 @@ void simple_conn::connect_to(const char server[],const char user[],const char pa
 
 	if (!mysql_real_connect(conn,server,user,passwd,database,0,NULL,CLIENT_MULTI_RESULTS))
 	{
-		fprintf(stderr, "%s\n", mysql_error(conn));
-		exit(1);
+		//fprintf(stderr, "%s\n", mysql_error(conn));
+		//exit(1);
+		this->log.error(mysql_error(conn));
 	}
 }
 
@@ -38,14 +40,18 @@ vector< vector<string> > simple_conn::query(const char q[])
 	vector< vector<string> > result;
 	if (conn == NULL)
 	{
-		printf("Cannot conncet to database!\n");
-		exit(1);
+		//printf("Cannot conncet to database!\n");
+		//exit(1);
+		this->log.error(q);
+		this->log.error(mysql_error(conn));
 	}
 
 	if (mysql_query(conn,q))
 	{
-		fprintf(stderr, "%s\n", mysql_error(conn));
-		exit(1);
+		//fprintf(stderr, "%s\n", mysql_error(conn));
+		//exit(1);
+		this->log.error(q);
+		this->log.error(mysql_error(conn));
 	}
 	res = mysql_use_result(conn);
 	if (res == NULL) return result;

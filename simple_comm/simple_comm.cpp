@@ -142,7 +142,7 @@ int simple_comm::accept_client()
 	}
 	char msg[MSGSIZE];
 	sprintf(msg, "receive a connection from %s\n", inet_ntoa(client_addr.sin_addr));
-	this->log.debug(msg);
+	this->log.info(msg);
 	return client;
 }
 int simple_comm::accept_client(sockaddr_in* client_addr)
@@ -158,7 +158,7 @@ int simple_comm::accept_client(sockaddr_in* client_addr)
 	}
 	char msg[MSGSIZE];
 	sprintf(msg, "receive a connection from %s\n", inet_ntoa(client_addr->sin_addr));
-	this->log.high_debug(msg);
+	this->log.info(msg);
 	return client;
 }
 
@@ -184,7 +184,7 @@ void simple_comm::close_socket(int _socket_, sockaddr_in* client_addr)
 	close(_socket_);
 	char msg[MSGSIZE];
 	sprintf(msg, "close connect from %s\n", inet_ntoa(client_addr->sin_addr));
-	this->log.high_debug(msg);
+	this->log.info(msg);
 }
 
 int simple_comm::get_socket()

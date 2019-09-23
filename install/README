@@ -20,7 +20,7 @@
 	"ui_comm_port":6667,
 	#是否开启学习模式0不开启，1开启
 	"is_learning":1,
-	#输出的等级 0[debug] 2[high_debug] 5[warning] 9[error]
+	#输出的等级 0[debug] 2[high_debug] 4[info] 5[warning] 9[error]
 	"LOG_LEVEL":0,
 	#数据库用户名
 	"db_user":"root",
