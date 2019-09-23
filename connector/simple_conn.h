@@ -6,6 +6,7 @@
 #include <mysql/mysql.h>
 #include <stdio.h>
 #include <string>
+#include "../simple_comm/simple_comm.h"
 
 
 using namespace std;
@@ -14,6 +15,7 @@ class simple_conn{
 	char user[32];
 	char passwd[32];
 	char database[32];
+	logger log;
 	MYSQL *conn;
 	MYSQL_RES *res;
 	MYSQL_ROW row;
@@ -25,6 +27,7 @@ public:
 	}
 
 	void connect_to(const char server[],const char user[],const char passwd[],const char database[]);
+
 
 	vector< vector<string> > query(const char q[]);
 };

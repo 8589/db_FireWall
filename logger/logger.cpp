@@ -20,6 +20,15 @@ void logger::warning(string msg)
 	}
 }
 
+void logger::info(string msg)
+{
+	if(LOG_LEVEL < 5)
+	{
+		printf("[info]:%s\n", msg.c_str());
+		fflush(stdout);
+	}
+}
+
 void logger::high_debug(string msg)
 {
 	if(LOG_LEVEL < 3)

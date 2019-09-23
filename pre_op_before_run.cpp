@@ -30,15 +30,15 @@ int main()
 	string sql_create_db = "create database if not exists LL_firewall;";
 	string sql_create_white_list = "create table if not exists white_list("
 		"user varchar(30) not null,"
-		"sql_cmd varchar(512) not null,"
-		"rule varchar(512) not null,"
-		"level int(5) not null,"
+		"sql_cmd varchar(2048) not null,"
+		"rule varchar(2048) not null,"
+		"level int not null,"
 		"addr_ip varchar(30) not null,"
-		"flag int(5) not null,"
+		"flag int not null,"
 		"primary key(user, sql_cmd, level, addr_ip));";
 	string sql_create_illegal_query = "create table if not exists illegal_query("
 		"user varchar(30) not null,"
-		"query_sql varchar(512) not null,"
+		"query_sql varchar(2048) not null,"
 		"addr_ip varchar(30) not null,"
 		"query_time datetime not null default now(),"
 		"primary key(user,query_sql,addr_ip,query_time));";
