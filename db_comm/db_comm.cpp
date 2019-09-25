@@ -9,8 +9,11 @@ int db_comm::handle_db_connection()
 	server.set_server(AF_INET,"127.0.0.1",this->db_port);
 	if(this->login() < 0)
 		return -1;
+	string s;
 	while(1){
-		int res = this->one_comm();
+		//int res = this->one_comm();
+		s.clear();
+		int res = this->select_one_comm(s);
 		if(res < 0)
 			return -1;
 		if(!res)
@@ -106,6 +109,35 @@ int db_comm::login()
 	log.high_debug("login successfully\n");
 	return 1;
 
+}
+
+int db_comm::select_one_comm(string& s)
+{
+	fd_set rset;
+	FD_ZERO(&rset);
+	FD_SET(client_fd, &rset);
+	FD_SET(server.get_socket(), &rset);
+	int maxfd = std::max(client_fd, server.get_socket()) + 1;
+	timeval tv;
+	tv.tv_sec = 60;
+	int res = select(maxfd, &rset, nullptr, nullptr, &tv);
+	if(res < 0)
+		return -1;
+	if(FD_ISSET(client_fd, &rset)){
+		int _size = this->recv_a_packet(s, client_fd);
+		if(_size <= 0)
+			return _size;
+		if(server.send_msg(s.c_str(), s.size()) < 0)
+			return -1;
+	}
+	if(FD_ISSET(server.get_socket(), &rset)){
+		int _size = this->recv_a_packet(s, server.get_socket());
+		if(_size <= 0)
+			return _size;
+		if(server.send_msg(client_fd, s.c_str(), s.size()) < 0)
+			return -1;
+	}
+	return 1;
 }
 
 int db_comm::one_comm()
