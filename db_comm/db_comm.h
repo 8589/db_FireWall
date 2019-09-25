@@ -31,9 +31,9 @@ public:
 		server.close_socket();
 	}
 
-	void handle_db_connection();
+	int handle_db_connection();
 
-	void login();
+	int login();
 
 	int one_comm();
 

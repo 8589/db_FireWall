@@ -2,16 +2,18 @@
 
 
 
-void simple_comm::create_socket(int domain, int type, int protocol)
+int simple_comm::create_socket(int domain, int type, int protocol)
 {
 	if( (this->_socket = socket(domain, type, protocol)) == -1)
 	{
 		char msg[MSGSIZE];
 		sprintf(msg, "create socket error:%s(errno:%d)\n", strerror(errno), errno);
 		this->log.error(msg);
-		exit(0);
+		//exit(0);
+		return -1;
 	}
 	this->log.debug("create socket successfully");
+	return 0;
 }
 
 
@@ -26,66 +28,77 @@ void simple_comm::set_server(int domain, string addr, int port){
 
 
 
-void simple_comm::bind_socket(){
+int simple_comm::bind_socket(){
+	int on = 1;
+	if(setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
+		return -1;
 	if( bind(this->_socket, (sockaddr*)&(this->addr), sizeof(this->addr)) == -1 )
 	{
 		char msg[MSGSIZE];
 		sprintf(msg, "bind socket error:%s(errno: %d)\n",strerror(errno),errno);
 		this->log.error(msg);
-		exit(0);
+		//exit(0);
+		return -1;
 	}
 	this->log.debug("bind socket successfully");
+	return 0;
 }
 
 
 
 
-void simple_comm::listen_client(int _size)
+int simple_comm::listen_client(int _size)
 {
 	if( listen(this->_socket, _size) == -1 )
 	{
 		char msg[MSGSIZE];
 		sprintf(msg, "listen socket error:%s(errno: %d)\n",strerror(errno),errno);
 		this->log.error(msg);
-		exit(0);
+		//exit(0);
+		return -1;
 	}
 	this->log.debug("listening .....");
+	return 0;
 }
 
 
 
 
-void simple_comm::connect_to_server()
+int simple_comm::connect_to_server()
 {
 	if( connect(this->_socket, (sockaddr*)&(this->addr), sizeof(this->addr)) < 0 )
 	{
 		char msg[MSGSIZE];
 		sprintf(msg, "connect socket error:%s(errno: %d)\n",strerror(errno),errno);
 		this->log.error(msg);
-		exit(0);
+		//exit(0);
+		return -1;
 	}
 	this->log.debug("connect_to_server successfully");
+	return 0;
 }
 
 
 
 
 
-void simple_comm::send_msg(const char* msg, int _size)
+int simple_comm::send_msg(const char* msg, int _size)
 {
-	this->send_msg(this->_socket, msg, _size);
+	return this->send_msg(this->_socket, msg, _size);
 }
 
-void simple_comm::send_msg(int _socket_, const char* msg, int _size)
+int simple_comm::send_msg(int _socket_, const char* msg, int _size)
 {
 	if( send(_socket_, msg, _size, 0) < 0 )
 	{
 		char msg[MSGSIZE];
 		sprintf(msg, "send socket error:%s(errno: %d)\n",strerror(errno),errno);
 		this->log.warning(msg);
-		exit(0);
+		//exit(0);
+		return -1;
 	}
 	this->log.debug("send msg successfully");
+	return 0;
 }
 
 
@@ -109,7 +122,8 @@ int simple_comm::recv_msg(int _socket_, int _size)
 		char msg[MSGSIZE];
 		sprintf(msg, "recv socket error:%s(errno: %d)\n",strerror(errno),errno);
 		this->log.warning(msg);
-		exit(0);
+		//exit(0);
+		return -1;
 	}
 	this->log.debug("recv msg successfully");
 	return recv_size;
@@ -138,7 +152,8 @@ int simple_comm::accept_client()
 		char msg[MSGSIZE];
 		sprintf(msg, "accept socket error:%s(errno: %d)\n",strerror(errno),errno);
 		this->log.warning(msg);
-		exit(0);
+		return -1;
+		//exit(0);
 	}
 	char msg[MSGSIZE];
 	sprintf(msg, "receive a connection from %s\n", inet_ntoa(client_addr.sin_addr));
@@ -154,7 +169,8 @@ int simple_comm::accept_client(sockaddr_in* client_addr)
 		char msg[MSGSIZE];
 		sprintf(msg, "accept socket error:%s(errno: %d)\n",strerror(errno),errno);
 		this->log.warning(msg);
-		exit(0);
+		return -1;
+		//exit(0);
 	}
 	char msg[MSGSIZE];
 	sprintf(msg, "receive a connection from %s\n", inet_ntoa(client_addr->sin_addr));

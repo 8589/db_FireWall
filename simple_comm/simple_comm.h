@@ -25,18 +25,18 @@ class simple_comm
 public:
 	sockaddr_in addr;
 
-	void create_socket(int domain, int type, int protocol=0);
+	int create_socket(int domain, int type, int protocol=0);
 
 	void set_server(int domain, string addr, int port);
 
-	void bind_socket();
+	int bind_socket();
 
-	void listen_client(int _size);
+	int listen_client(int _size);
 
-	void connect_to_server();
+	int connect_to_server();
 
-	void send_msg(const char* msg, int _size);
-	void send_msg(int _socket_, const char* msg, int _size);
+	int send_msg(const char* msg, int _size);
+	int send_msg(int _socket_, const char* msg, int _size);
 
 	int recv_msg();
 	int recv_msg(int _socket_);

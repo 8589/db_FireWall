@@ -5,13 +5,22 @@
 void firewall::start_firewall(int db_server_port, int firewall_port)
 {
 	simple_comm server;
-	server.create_socket(AF_INET, SOCK_STREAM, 0);
+	if(server.create_socket(AF_INET, SOCK_STREAM, 0) < 0){
+		exit(0);
+	}
 	server.set_server(AF_INET,"0.0.0.0",firewall_port);
-	server.bind_socket();
-	server.listen_client(10);
+	if(server.bind_socket() < 0){
+		exit(0);
+	}
+	if(server.listen_client(10) < 0){
+		exit(0);
+	}
 	while(1){
 		sockaddr_in client_addr;
 		int client = server.accept_client(&client_addr);
+		if(client < 0){
+			continue;
+		}
 		thread t([](int _client, int port, sockaddr_in _client_addr, bool _mode){
 			db_comm dc(_client, port, _client_addr, _mode);
 			dc.handle_db_connection();
