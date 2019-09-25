@@ -12,6 +12,8 @@ extern atomic<bool> is_learning;
 
 class firewall
 {
+private:
+	logger log;
 public:
 
 	void start_firewall(int db_server_port=3306, int firewall_port=6666);

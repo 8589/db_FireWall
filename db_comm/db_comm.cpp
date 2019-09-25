@@ -2,38 +2,38 @@
 #include <cstring>
 
 
-//Summary: handle a connection from a db client
-
-//Parameters:
-
-//Return : 
-void db_comm::handle_db_connection()
+int db_comm::handle_db_connection()
 {
-	server.create_socket(AF_INET, SOCK_STREAM, 0);
+	if(server.create_socket(AF_INET, SOCK_STREAM, 0) < 0)
+		return -1;
 	server.set_server(AF_INET,"127.0.0.1",this->db_port);
-	this->login();
+	if(this->login() < 0)
+		return -1;
 	while(1){
-		if(!this->one_comm())
+		int res = this->one_comm();
+		if(res < 0)
+			return -1;
+		if(!res)
 			break;
 	}
+	return 0;
 }
 
 
-//Summary: imitate the login
-
-//Parameters:
-
-//Return : 
-void db_comm::login()
+int db_comm::login()
 {
 	//to server
-	server.connect_to_server();
+	if ( server.connect_to_server() < 0)
+		return -1;
 
 	//from server
-	int _size = server.recv_msg();
+	int _size = 0;
+	if((_size = server.recv_msg()) < 0)
+		return -1;
 	server.read_msg(this->buff);
 
-	this->eof_num = ((*(int*)(this->buff+16))&(0x00ffff00) & 0x00000400)?1:2;
+	//this->eof_num = ((*(int*)(this->buff+16))&(0x00ffff00) & 0x00000400)?1:2;
+	//cout << "eof_num=" << this->eof_num << endl;
 	/*
 	this->eof_num = (*(int*)(this->buff+16))&(0x03ffff00);
 	printf("eof_num: %d\n", this->eof_num);
@@ -47,11 +47,14 @@ void db_comm::login()
 	*/
 
 	//to client
-	server.send_msg(this->client_fd, this->buff, _size);
+	if(server.send_msg(this->client_fd, this->buff, _size) < 0)
+		return -1;
 
 	
 	//from client
-	_size = server.recv_msg(this->client_fd);
+	if((_size = server.recv_msg(this->client_fd)) < 0)
+		return -1;
+	
 	server.read_msg(this->buff);
 	//log.debug("@@@@@@@@@@@@@user@@@@@@@@@@@@@@@@@@@@\n");
 	this->user = string(this->buff+36);
@@ -62,9 +65,18 @@ void db_comm::login()
 
 
 	//get the count of the eof packet in the result packet
-	if(this->eof_num == 1)
-		this->eof_num = (((*(int*)(this->buff))&(0x0000ffff) & 0x00000004)?1:2);
-
+	//if(this->eof_num == 1)
+	//	this->eof_num = (((*(int*)(this->buff))&(0x0000ffff) & 0x00000004)?1:2);
+	//cout << "eof_num=" << this->eof_num << endl;
+	this->eof_num = 1;
+	int *ip = (int*)this->buff;
+	for(int i=0;i<32;i++){
+		if(*ip & (1<<i))
+			printf("1");
+		else
+			printf("0");
+	}
+	printf("\n");
 	/*
 	printf("eof_num: %d\n", this->eof_num);
 	for(int i=0x00000001;i<0x00040000;i=i<<1)
@@ -77,31 +89,39 @@ void db_comm::login()
 	*/
 
 	//to server
-	server.send_msg(this->buff, _size);
+
+	if(server.send_msg(this->buff, _size) < 0)
+		return -1;
 
 	//from server
-	_size = server.recv_msg();
+	if((_size = server.recv_msg()) < 0)
+		return -1;
 	server.read_msg(this->buff);
 
 	//to client
-	server.send_msg(this->client_fd, this->buff, _size);
+
+	if(server.send_msg(this->client_fd, this->buff, _size) < 0)
+		return -1;
 	
-
-
 	log.high_debug("login successfully\n");
+	return 1;
 
 }
 
-
-//Summary: finish a complete communication that send query sql from db client and receive query result from db server
-
-//Parameters:
-
-//Return : if the communication is finish,return 1. others such as close the connection or a illegal query will return 0
 int db_comm::one_comm()
 {
-	
-	return  this->client_to_server() && this->server_to_client();
+	int res= this->client_to_server();
+	if(res < 0)
+		return -1;
+	else if(res == 0)
+		return 0;
+
+	res = this->server_to_client();
+	if(res < 0)
+		return -1;
+	else if(res == 0)
+		return 0;
+	return 1;
 }
 
 
@@ -128,7 +148,11 @@ int db_comm::client_to_server()
 	//from client
 	string recv_msg;
 	string sql;
-	int packet_size = this->recv_a_packet(recv_msg, client_fd);
+	int packet_size;
+	if((packet_size = this->recv_a_packet(recv_msg, client_fd)) < 0)
+		return -1;
+	if(packet_size == 0)
+		return 0;
 
 	char msg[MSGSIZE];
 	sprintf(msg, "the size of the packet receive from client: %lu",recv_msg.size());
@@ -153,7 +177,8 @@ int db_comm::client_to_server()
 		}
 }
 	//to server
-	server.send_msg(recv_msg.c_str(), recv_msg.size());
+	if(server.send_msg(recv_msg.c_str(), recv_msg.size()) < 0)
+		return -1;
 	return 1;
 }
 
@@ -166,7 +191,11 @@ int db_comm::server_to_client()
 {
 	//from server
 	string recv_msg;
-	int packet_size = this->recv_a_packet(recv_msg, server.get_socket());
+	int packet_size ;
+	if((packet_size = this->recv_a_packet(recv_msg, server.get_socket())) < 0)
+		return -1;
+	if(packet_size == 0)
+		return 0;
 	int all_packet_size = packet_size;
 	string all_recv_msg = recv_msg;
 	if(recv_msg.size() > 4 && recv_msg[4] != (char)0x00 && recv_msg[4] != (char)0xff && recv_msg[4] != (char)0xfe)
@@ -174,7 +203,10 @@ int db_comm::server_to_client()
 		int eof_cnt = this->eof_num;
 		while(eof_cnt)
 		{
-			packet_size = this->recv_a_packet(recv_msg, server.get_socket());
+			if((packet_size = this->recv_a_packet(recv_msg, server.get_socket())) < 0)
+				return -1;
+			if(packet_size == 0)
+				break;
 			all_packet_size += packet_size;
 			all_recv_msg += recv_msg;
 			if(recv_msg.size() > 4 && recv_msg[4] == (char)0xfe)
@@ -185,27 +217,24 @@ int db_comm::server_to_client()
 	sprintf(msg, "the size of the packet receive from server: %lu", all_recv_msg.size());
 	log.high_debug(msg);
 	//to client
-	server.send_msg(this->client_fd, all_recv_msg.c_str(), all_recv_msg.size());
+	if(server.send_msg(this->client_fd, all_recv_msg.c_str(), all_recv_msg.size()) < 0)
+		return -1;
 	log.high_debug("operate successflly\n");
-	return all_packet_size;
+	//return all_packet_size;
+	return 1;
 }
 
 
-
-//Summary: receive a complete packet
-
-//Parameters:
-
-//       recv_msg:a reference of string type to store the content of packet
-//       _socket_ : the socket you want to recerve a packet
-
-//Return : real msg size, not the size of recv_msg
 int db_comm::recv_a_packet(string& recv_msg, int _socket_)
 {
 	recv_msg.clear();
 	//get the size of this packet
 	int _size = server.recv_msg(_socket_, 4);
+	if(_size  < 0)
+		return -1;
+
 	if(!_size)	return 0;
+	
 	server.read_msg(this->buff, _size);
 
 	//get the size of real msg 
@@ -218,7 +247,8 @@ int db_comm::recv_a_packet(string& recv_msg, int _socket_)
 
 	while(_recv_size < total_msg_size)
 	{
-		_size = server.recv_msg(_socket_, min((unsigned int)BUFFSIZE, total_msg_size-_recv_size));
+		if((_size = server.recv_msg(_socket_, min((unsigned int)BUFFSIZE, total_msg_size-_recv_size))) < 0)
+			return -1;
 		server.read_msg(this->buff, _size);
 		recv_msg += string(this->buff,this->buff+_size);
 		_recv_size += _size;
