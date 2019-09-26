@@ -11,6 +11,8 @@ extern int LOG_LEVEL;
 extern std::string db_user;
 extern std::string db_password;
 extern std::string db_name;
+extern int time_out;
+extern int listen_queue_size;
 int main()
 {
 	logger log;
@@ -64,6 +66,9 @@ int main()
 	oJson.Get("db_user", db_user);
 	oJson.Get("db_password", db_password);
 	oJson.Get("db_name",db_name);
+
+	oJson.Get("time_out", time_out);
+	oJson.Get("listen_queue_size", listen_queue_size);
 
 
 	thread t1([&,server_port, firewall_port, ui_comm_port](){

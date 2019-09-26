@@ -11,7 +11,6 @@ int db_comm::handle_db_connection()
 		return -1;
 	string s;
 	while(1){
-		//int res = this->one_comm();
 		s.clear();
 		int res = this->select_one_comm(s);
 		if(res < 0)
@@ -35,19 +34,6 @@ int db_comm::login()
 		return -1;
 	server.read_msg(this->buff);
 
-	//this->eof_num = ((*(int*)(this->buff+16))&(0x00ffff00) & 0x00000400)?1:2;
-	//cout << "eof_num=" << this->eof_num << endl;
-	/*
-	this->eof_num = (*(int*)(this->buff+16))&(0x03ffff00);
-	printf("eof_num: %d\n", this->eof_num);
-	for(int i=0x00000100;i<0x04000000;i=i<<1)
-	{
-		if(this->eof_num & i)
-			printf("1\n");
-		else 
-			printf("0\n");
-	}
-	*/
 
 	//to client
 	if(server.send_msg(this->client_fd, this->buff, _size) < 0)
@@ -59,38 +45,10 @@ int db_comm::login()
 		return -1;
 	
 	server.read_msg(this->buff);
-	//log.debug("@@@@@@@@@@@@@user@@@@@@@@@@@@@@@@@@@@\n");
 	this->user = string(this->buff+36);
 	log.high_debug(string("user: ") + this->user);
-	//log.debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
 
-	//this->eof_num = ((*(int*)(this->buff))&(0x0000ffff) & 0x00000200)?1:2;
-
-
-	//get the count of the eof packet in the result packet
-	//if(this->eof_num == 1)
-	//	this->eof_num = (((*(int*)(this->buff))&(0x0000ffff) & 0x00000004)?1:2);
-	//cout << "eof_num=" << this->eof_num << endl;
 	this->eof_num = 1;
-	int *ip = (int*)this->buff;
-	for(int i=0;i<32;i++){
-		if(*ip & (1<<i))
-			printf("1");
-		else
-			printf("0");
-	}
-	printf("\n");
-	/*
-	printf("eof_num: %d\n", this->eof_num);
-	for(int i=0x00000001;i<0x00040000;i=i<<1)
-	{
-		if(this->eof_num & i)
-			printf("1\n");
-		else 
-			printf("0\n");
-	}
-	*/
-
 	//to server
 
 	if(server.send_msg(this->buff, _size) < 0)
@@ -123,12 +81,24 @@ int db_comm::select_one_comm(string& s)
 	int res = select(maxfd, &rset, nullptr, nullptr, &tv);
 	if(res < 0)
 		return -1;
+	if(res == 0){
+		char msg[MSGSIZE];
+		sprintf(msg, "the connection from %s was time out\n", inet_ntoa((this->client_addr).sin_addr));
+		this->log.error(msg);
+		return -1;
+	}
 	if(FD_ISSET(client_fd, &rset)){
 		int _size = this->recv_a_packet(s, client_fd);
 		if(_size <= 0)
 			return _size;
-		if(server.send_msg(s.c_str(), s.size()) < 0)
+		if(check_sql(s) > 0){
+			if(server.send_msg(s.c_str(), s.size()) < 0)
+				return -1;
+		}else{
 			return -1;
+		}
+			
+
 	}
 	if(FD_ISSET(server.get_socket(), &rset)){
 		int _size = this->recv_a_packet(s, server.get_socket());
@@ -136,6 +106,24 @@ int db_comm::select_one_comm(string& s)
 			return _size;
 		if(server.send_msg(client_fd, s.c_str(), s.size()) < 0)
 			return -1;
+	}
+	return 1;
+}
+
+int db_comm::check_sql(string& recv_msg){
+	if(recv_msg.size() >= 5){
+		string sql = string(recv_msg,5,recv_msg.size()-5);
+		log.high_debug(sql.c_str());
+		//to open filter
+		filter f;
+		if(this->mode){
+			f.add_white_list_n_times(this->user, sql, 4, string(inet_ntoa((this->client_addr).sin_addr)));
+		}else{
+			if(!f.is_legal_and_add_log((this->user).c_str(), sql.c_str(), string(inet_ntoa((this->client_addr).sin_addr))))
+			{
+				return this->hanlde_illegal_query();
+			}
+		}
 	}
 	return 1;
 }
@@ -157,14 +145,11 @@ int db_comm::one_comm()
 }
 
 
-//Summary: how to handle a illegal query. this func can rewrite by the requirement
-
-//Parameters:
-
-//Return : just return 0;
 int db_comm::hanlde_illegal_query()
 {
-	log.warning("a illegal query\n");
+	char msg[MSGSIZE];
+	sprintf(msg, "a illegal query and close the connection from %s\n", inet_ntoa((this->client_addr).sin_addr));
+	log.warning(msg);
 	return 0;
 }
 
@@ -207,7 +192,7 @@ int db_comm::client_to_server()
 				return this->hanlde_illegal_query();
 			}
 		}
-}
+	}
 	//to server
 	if(server.send_msg(recv_msg.c_str(), recv_msg.size()) < 0)
 		return -1;

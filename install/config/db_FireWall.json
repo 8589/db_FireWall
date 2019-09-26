@@ -9,5 +9,8 @@
 "LOG_LEVEL":0,
 "db_user":"root",
 "db_password":"123456",
-"db_name":"LL_firewall"
+"db_name":"LL_firewall",
+
+"time_out":60,
+"listen_queue_size":1024
 }

@@ -9,6 +9,7 @@
 using namespace std;
 
 extern atomic<bool> is_learning;
+extern int listen_queue_size;
 
 class firewall
 {

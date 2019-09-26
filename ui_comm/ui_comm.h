@@ -17,19 +17,24 @@ private:
 	char buff[BUFFSIZE];
 	connector conn;
 public:
+
+	~ui_comm(){
+		server.close_socket(this->client_fd);
+		server.close_socket();
+	}
 	ui_comm(int _client, int _db_port):client_fd(_client),db_port(_db_port){};
 
 	void handle_ui_connection();
 
-	void handle_packet(string& msg);
+	int handle_packet(string& msg);
 
-	void switch_mode(string& msg);
+	int switch_mode(string& msg);
 
-	void update_a_rule(string& msg);
+	int update_a_rule(string& msg);
 
 	int recv_a_packet(string& recv_msg, int _socket_);
 
-	void send_result(char result);
+	int send_result(char result);
 
 };
 

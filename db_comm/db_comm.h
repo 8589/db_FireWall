@@ -36,6 +36,7 @@ public:
 	int login();
 
 	int select_one_comm(string& s);
+	int check_sql(string& recv_msg);
 	int one_comm();
 
 	int hanlde_illegal_query();
