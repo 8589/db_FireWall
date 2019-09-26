@@ -22,7 +22,7 @@ done
 
 
 case "$1" in
-'star't)
+'start')
 	start
 	;;
 'stop')

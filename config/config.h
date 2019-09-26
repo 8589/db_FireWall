@@ -11,6 +11,8 @@ extern int LOG_LEVEL;
 extern std::string db_user;
 extern std::string db_password;
 extern std::string db_name;
+extern int time_out;
+extern int listen_queue_size;
 
 
 

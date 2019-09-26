@@ -4,24 +4,25 @@
 void ui_comm::handle_ui_connection()
 {
 	string msg;
-	this->recv_a_packet(msg, this->client_fd);
+	if(this->recv_a_packet(msg, this->client_fd) <= 0)
+		return;
 	//printf("###%lu\n",msg.size());
 	this->handle_packet(msg);
 }
 
-void ui_comm::handle_packet(string& msg)
+int ui_comm::handle_packet(string& msg)
 {
 	if(msg.size()>=5)
 	{
 		//switch mode
 		if(msg[4] == '\1')
 		{
-			this->switch_mode(msg);
+			return this->switch_mode(msg);
 		}
 		//insert a rule
 		else if(msg[4] == '\2')
 		{
-			this->update_a_rule(msg);
+			return this->update_a_rule(msg);
 		}
 		//remaining
 		else
@@ -29,9 +30,10 @@ void ui_comm::handle_packet(string& msg)
 			log.debug("do nothing!");
 		}
 	}
+	return 1;
 }
 
-void ui_comm::switch_mode(string& msg)
+int ui_comm::switch_mode(string& msg)
 {
 	log.debug("switch mode");
 	if(msg.size() >= 6)
@@ -40,39 +42,46 @@ void ui_comm::switch_mode(string& msg)
 		{
 			log.debug("on");
 			is_learning.store(true);
-			this->send_result(1);
+			if(this->send_result(1) < 0)
+				return -1;
 		}
 		else if(msg[5] == '\0')
 		{
 			log.debug("off");
 			is_learning.store(false);
-			this->send_result(1);
+			if(this->send_result(1) < 0)
+				return -1;
 		}
 		else if(msg[5] == '\2')
 		{
 			log.debug("query mode");
-			this->send_result(is_learning.load());
+			if(this->send_result(is_learning.load()) < 0)
+				return -1;
 		}
 		else if(msg[5] == '\4')
 		{
 			log.debug("just switch");
 			is_learning.store(is_learning.load()^1);
-			this->send_result(is_learning.load());
+			if(this->send_result(is_learning.load()) < 0)
+				return -1;
 		}
 		else
 		{
 			log.debug("switch mode -> nothing");
-			this->send_result(1);
+			if(this->send_result(1) < 0)
+				return -1;
 		}
 	}
 	else
 	{
 		log.debug("switch mode -> no info for what to do");
-		this->send_result(0);
+		if(this->send_result(0) < -1)
+			return -1;
 	}
+	return 1;
 }
 
-void ui_comm::update_a_rule(string& msg)
+int ui_comm::update_a_rule(string& msg)
 {
 	log.debug("update a rule");
 	if(msg.size() >= 7)
@@ -97,12 +106,15 @@ void ui_comm::update_a_rule(string& msg)
 			(this->conn).remove_from_a_list(user, sql, addr_ip, (update&1)+1);
 		}
 		(this->conn).close();
-		this->send_result(1);
+		if(this->send_result(1) < 0)
+			return -1;
 	}
 	else
 	{
-		this->send_result(0);
+		if(this->send_result(0) < 0)
+			return -1;
 	}
+	return 1;
 }
 
 
@@ -112,7 +124,9 @@ int ui_comm::recv_a_packet(string& recv_msg, int _socket_)
 {
 	recv_msg.clear();
 	int _size = server.recv_msg(_socket_, 4);
-	if(!_size)	return 0;
+	if(_size <= 0)
+		return _size;
+
 	server.read_msg(this->buff, _size);
 
 	unsigned int msg_size = (*((unsigned int*)buff))&(0xffffffffu);
@@ -120,13 +134,15 @@ int ui_comm::recv_a_packet(string& recv_msg, int _socket_)
 	//unsigned int msg_index = (unsigned char)(*(buff+3));
 	//printf("$$%u\n", msg_index);
 
-	unsigned int total_msg_size = msg_size + 4;
+	unsigned int total_msg_size = msg_size + _size;
 	recv_msg = string(this->buff,this->buff+_size);
 	unsigned int _recv_size = _size;
 
 	while(_recv_size < total_msg_size)
 	{
 		_size = server.recv_msg(this->client_fd, min((unsigned int)BUFFSIZE,total_msg_size-_recv_size));
+		if(_size <= 0)
+			return _size;
 		server.read_msg(this->buff, _size);
 		recv_msg += string(this->buff,this->buff+_size);
 		_recv_size += _size;
@@ -136,8 +152,10 @@ int ui_comm::recv_a_packet(string& recv_msg, int _socket_)
 
 
 
-void ui_comm::send_result(char result)
+int ui_comm::send_result(char result)
 {
 	char res = result;
-	server.send_msg(this->client_fd, &res, 1);
+	if(server.send_msg(this->client_fd, &res, 1) < 0)
+		return -1;
+	return 1;
 }

@@ -1,6 +1,11 @@
 1.安装
 	./install.sh
 
+	如果没有权限执行
+	sudo ./install.sh
+	并且执行
+	chmod a+w /etc/db_FireWall/db_FireWall.log
+
 2.启动服务
 	/etc/init.d/db_FireWall start
 3.关闭服务
@@ -28,6 +33,10 @@
 	"db_password":"123456",
 	#存储防火墙信息的数据库名
 	"db_name":"LL_firewall"
+	#超时设置,当客户端超过time_out秒没有操作,防火墙会断掉连接,单位是秒
+	"time_out":60
+	#监听队列大小
+	"listen_queue_size":1024
 
 6.运行日志
 	/etc/db_FireWall/db_FireWall.log
