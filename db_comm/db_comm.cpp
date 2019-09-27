@@ -12,6 +12,7 @@ int db_comm::handle_db_connection()
 	string s;
 	while(1){
 		s.clear();
+		//int res = this->one_comm();
 		int res = this->select_one_comm(s);
 		if(res < 0)
 			return -1;
@@ -88,6 +89,7 @@ int db_comm::select_one_comm(string& s)
 		return -1;
 	}
 	if(FD_ISSET(client_fd, &rset)){
+
 		int _size = this->recv_a_packet(s, client_fd);
 		if(_size <= 0)
 			return _size;
@@ -98,7 +100,6 @@ int db_comm::select_one_comm(string& s)
 			return -1;
 		}
 			
-
 	}
 	if(FD_ISSET(server.get_socket(), &rset)){
 		int _size = this->recv_a_packet(s, server.get_socket());
@@ -115,11 +116,10 @@ int db_comm::check_sql(string& recv_msg){
 		string sql = string(recv_msg,5,recv_msg.size()-5);
 		log.high_debug(sql.c_str());
 		//to open filter
-		filter f;
 		if(this->mode){
-			f.add_white_list_n_times(this->user, sql, 4, string(inet_ntoa((this->client_addr).sin_addr)));
+			(this->f).add_white_list_n_times(this->user, sql, 4, string(inet_ntoa((this->client_addr).sin_addr)));
 		}else{
-			if(!f.is_legal_and_add_log((this->user).c_str(), sql.c_str(), string(inet_ntoa((this->client_addr).sin_addr))))
+			if(!((this->f).is_legal_and_add_log((this->user).c_str(), sql.c_str(), string(inet_ntoa((this->client_addr).sin_addr)))))
 			{
 				return this->hanlde_illegal_query();
 			}

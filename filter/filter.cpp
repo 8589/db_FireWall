@@ -21,11 +21,11 @@ bool filter::is_legal_and_add_log(string user, string _sql, string ip)
 	for(int i=1;i<5;i++)
 	{
 		this->parse_sql(_sql, i, rule);	
-		(this->conn).connect_to_db();
+		//(this->conn).connect_to_db();
 		if((this->conn).query_rule_in_black_list(user, rule, ip))
 		{
 			(this->conn).add_illegal_query(user, _sql, ip);
-			(this->conn).close();
+			//(this->conn).close();
 			return false;	
 		}
 		if((this->conn).query_rule_in_white_list(user, rule, ip))
@@ -34,7 +34,7 @@ bool filter::is_legal_and_add_log(string user, string _sql, string ip)
 	if(res == true)
 		return true;
 	(this->conn).add_illegal_query(user, _sql, ip);
-	(this->conn).close();
+	//(this->conn).close();
 	return false;	
 }
 
@@ -66,16 +66,16 @@ void filter::add_white_list(string user, string _sql, int level, string ip)
 {
 	string _sql_;
 	this->parse_sql(_sql, 1, _sql_);
-	(this->conn).connect_to_db();
+	//(this->conn).connect_to_db();
 	if((this->conn).query_sql(user, _sql_, level, ip))
 	{
-		(this->conn).close();
+		//(this->conn).close();
 		return;
 	}
 	string rule;
 	this->parse_sql(_sql, level, rule);
 	(this->conn).add_white_list(user, _sql_, rule, level, ip);
-	(this->conn).close();
+	//(this->conn).close();
 }
 
 

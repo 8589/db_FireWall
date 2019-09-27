@@ -20,6 +20,7 @@ private:
 	sockaddr_in client_addr;	//get the ip of client
 	bool mode;	//learing or prtection mode
 	int eof_num;
+	filter f;
 
 public:
 	//sql_comm();
