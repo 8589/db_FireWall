@@ -14,6 +14,12 @@ class filter
 private:
 	connector conn;
 public:
+	filter(){
+		(this->conn).connect_to_db();
+	}
+	~filter(){
+		(this->conn).close();
+	}
 
 	bool is_legal_and_add_log(string user, string _sql, string ip);
 	//bool is_legal_and_add_log(string user, string _sql, string ip, bool flag);
