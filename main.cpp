@@ -1,5 +1,5 @@
-#include "firewall/firewall.h"
-#include "./utils/CJsonObject.hpp"
+#include "firewall.h"
+#include "CJsonObject.hpp"
 #include <thread>
 #include <fstream>
 #include <dlfcn.h>

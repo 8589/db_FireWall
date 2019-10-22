@@ -1,18 +1,22 @@
 //使用方法
-1.编译词法分析器
-	cd sql_parser
-	./compile.sh
+1.编译CJsonObject
+	cd utils/CJsonObject
+	mkdir build
+	cd build
+	cmake .. && make
 
-2.安装libmysql-dev
-	sudo apt-get install libmysqld-dev
+2.编译sql_parser
+	cd utils/sql_parser
+	mkdir build
+	cd build
+	cmake .. && make
 
-3.创建数据库
-	./pre_compile.sh
-	./pre_op_before_run
+3.编译防火墙
+	mkdir build
+	cd build
+	cmake .. && make
 
-4.编译运行防火墙
-	./compile.sh
-	./main
+
 
 
 //配置文件是db_FireWall.json
