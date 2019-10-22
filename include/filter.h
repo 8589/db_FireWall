@@ -1,8 +1,8 @@
 #ifndef _FILTER_H_
 #define _FILTER_H_
 
-#include "../connector/connector.h"
-#include "../sql_parser/sql_parser.h"
+#include "connector.h"
+#include "sql_parser.h"
 #include <string>
 #include <sstream>
 using namespace std;

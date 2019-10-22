@@ -1,9 +1,9 @@
 #ifndef _FIREWALL_H_
 #define _FIREWALL_H_
 
-#include "../db_comm/db_comm.h"
-#include "../ui_comm/ui_comm.h"
-#include "../config/config.h"
+#include "db_comm.h"
+#include "ui_comm.h"
+#include "config.h"
 #include <thread>
 
 using namespace std;

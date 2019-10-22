@@ -11,8 +11,8 @@
 #include <sys/select.h>
 #include <sys/time.h>
 #include <errno.h>
-#include "../logger/logger.h"
-#include "../config/config.h"
+#include "logger.h"
+#include "config.h"
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstdlib>

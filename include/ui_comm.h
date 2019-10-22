@@ -1,8 +1,8 @@
 #ifndef _UI_COMM_H_
 #define _UI_COMM_H_
 
-#include "../simple_comm/simple_comm.h"
-#include "../connector/connector.h"
+#include "simple_comm.h"
+#include "connector.h"
 
 
 extern atomic<bool> is_learning;

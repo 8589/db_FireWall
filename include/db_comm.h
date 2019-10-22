@@ -1,8 +1,8 @@
 #ifndef _DB_COMM_H_
 #define _DB_COMM_H_
 
-#include "../simple_comm/simple_comm.h"
-#include "../filter/filter.h"
+#include "simple_comm.h"
+#include "filter.h"
 #include <vector>
 #include <string>
 

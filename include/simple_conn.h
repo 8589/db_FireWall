@@ -6,7 +6,7 @@
 #include <mysql/mysql.h>
 #include <stdio.h>
 #include <string>
-#include "../simple_comm/simple_comm.h"
+#include "simple_comm.h"
 
 
 using namespace std;
