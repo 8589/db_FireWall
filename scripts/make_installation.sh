@@ -1,7 +1,7 @@
 mkdir installation
-cp build/db_FireWall installation
-cp config installation -r
-cp scripts installation -r
+cp ../build/db_FireWall installation
+cp ../config installation -r
+#cp scripts installation -r
 
 tar -jcv -f installation.tar.bz2 installation/
 
