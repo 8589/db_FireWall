@@ -8,3 +8,4 @@ std::string db_password;
 std::string db_name;
 int time_out = 60;
 int listen_queue_size = 1024;
+int default_level=0;

@@ -6,7 +6,7 @@ void logger::error(string msg)
 {
 	if(LOG_LEVEL < 10)
 	{
-		printf("[error]:%s\n", msg.c_str());
+		fprintf(stderr,"[error]:%s\n", msg.c_str());
 		fflush(stdout);
 	}
 }

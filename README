@@ -17,6 +17,33 @@
 	cmake .. && make
 
 
+配置文件
+	/etc/db_FireWall/db_FireWall.json
+        #数据库服务器端口
+        "server_port":3306,
+        #防火墙端口
+        "firewall_port":6666,
+        #与ui通信的端口
+        "ui_comm_port":6667,
+        #是否开启学习模式0不开启，1开启
+        "is_learning":1,
+        #输出的等级 0[debug] 2[high_debug] 4[info] 5[warning] 9[error]
+        "LOG_LEVEL":0,
+        #数据库用户名(设置为null可在启动防火墙时输入，不可删除)
+        "db_user":"root",
+        #数据库密码(设置为null可在启动防火墙时输入，不可删除)
+        "db_password":"123456",
+        #存储防火墙信息的数据库名
+        "db_name":"LL_firewall"
+        #超时设置,当客户端超过time_out秒没有操作,防火墙会断掉连接,单位是秒
+        "time_out":60
+        #监听队列大小
+        "listen_queue_size":1024
+        #默认生效等级
+        "default_level":0
+
+
+
 v2.0
 	修改所有代码结构，改为cmake编译
 v2.1
@@ -48,8 +75,10 @@ v2.1
 			query_sql varchar(2048) not null, 
 			addr_ip varchar(30) not null, 
 			query_time datetime not null default now());
-
-select count(*) from white_list where rule in ("select * from white_list","select * from white_list","select col from white_list","select col from tab") and ((level&8) or addr_ip="127.0.0.1") and ((level&16) or user="root") and flag&1 and (not flag&2);
+	3.添加名单时，设置默认值，在配置文件里面的default_level里面设置
+	4.修改配置文件里面的密码，需要在启动防火墙时输入密码或者用户,增加测试密码是否正确功能
+	5.在filter里面添加init功能，直接初始化数据库，不用其他脚本
+	6.调整naive_sql_parser的level等级从1/2/3/4变成0/1/2/3
 
 
 //配置文件是db_FireWall.json

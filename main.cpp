@@ -1,8 +1,11 @@
 #include "firewall.h"
 #include "CJsonObject.hpp"
+#include <mysql/mysql.h>
 #include <thread>
 #include <fstream>
 #include <dlfcn.h>
+#include <iostream>
+#include <unistd.h>
 using namespace std;
 using namespace neb;
 
@@ -13,8 +16,29 @@ extern std::string db_password;
 extern std::string db_name;
 extern int time_out;
 extern int listen_queue_size;
-int main()
+extern int default_level;
+
+#define TTY_PATH 			"/dev/tty"
+#define STTY_CLOSE          "stty raw -echo -F "
+#define STTY_OPEN           "stty -raw echo -F "
+//关闭参数
+//system(STTY_CLOSE TTY_PATH);
+//打开参数
+//system(STTY_OPEN TTY_PATH);
+
+int test_db_config()
 {
+	logger log;
+	MYSQL *conn = mysql_init(NULL);
+	if (!mysql_real_connect(conn,"127.0.0.1",db_user.c_str(),db_password.c_str(),db_name.c_str(),0,NULL,CLIENT_MULTI_RESULTS)){
+		log.error(mysql_error(conn));
+		exit(1);
+	}
+}
+
+int main(int argc, char** argv)
+{
+	
 	logger log;
 	ifstream fin("/etc/db_FireWall/db_FireWall.json");
 	string json;
@@ -63,13 +87,42 @@ int main()
 	oJson.Get("LOG_LEVEL", LOG_LEVEL);
 
 
-	oJson.Get("db_user", db_user);
-	oJson.Get("db_password", db_password);
+	string user_key = "db_user";
+	if(oJson.IsNull(user_key))
+	{
+		printf("user:");
+		cin >> db_user;
+	}else
+	{
+		oJson.Get("db_user", db_user);
+	}
+	string pwd_key = "db_password";
+	if(oJson.IsNull(pwd_key))
+	{
+		db_password = string(getpass("password:"));
+	}else
+	{
+		oJson.Get("db_password", db_password);
+	}
+	
+	
 	oJson.Get("db_name",db_name);
+	test_db_config();
+	if(argc == 1);
+	else if(argc == 2 && !strcmp(argv[1], "init"))
+	{
+		naive_filter::init_db();
+		exit(0);
+	}else
+	{
+		fprintf(stderr, "<usage> : db_FireWall [init]\n");
+		exit(2);
+	}
 
 	oJson.Get("time_out", time_out);
 	oJson.Get("listen_queue_size", listen_queue_size);
 
+	oJson.Get("default_level", default_level);
 
 	thread t1([&,server_port, firewall_port, ui_comm_port](){
 		firewall fw;

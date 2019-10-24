@@ -12,6 +12,7 @@ using namespace std;
 extern std::string db_user;
 extern std::string db_password;
 extern std::string db_name;
+extern int default_level;
 
 class naive_filter : public filter
 {
@@ -35,6 +36,10 @@ public:
 	void add_white_list(string user, string _sql, string rule, int level, string ip);
 
 	void add_illegal_query(string user, string sql, string ip);
+
+	static void init_db();
+
+
 
 };
 
