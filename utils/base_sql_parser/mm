@@ -1,0 +1,4 @@
+flex ../lex.l
+mv lex.yy.cc ..
+cp ../base_sql_parser.h ../../../include
+

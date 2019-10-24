@@ -44,6 +44,7 @@ vector< vector<string> > simple_conn::query(const char q[])
 		//exit(1);
 		this->log.error(q);
 		this->log.error(mysql_error(conn));
+		return result;
 	}
 
 	if (mysql_query(conn,q))
@@ -52,6 +53,7 @@ vector< vector<string> > simple_conn::query(const char q[])
 		//exit(1);
 		this->log.error(q);
 		this->log.error(mysql_error(conn));
+		return result;
 	}
 	res = mysql_use_result(conn);
 	if (res == NULL) return result;

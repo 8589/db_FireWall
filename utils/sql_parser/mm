@@ -1,4 +1,0 @@
-flex ../lex.l
-mv lex.yy.cc ..
-cp ../sql_parser.h ../../../include
-

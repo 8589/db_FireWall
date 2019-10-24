@@ -1,7 +1,5 @@
 #include "firewall.h"
 
-
-
 void firewall::start_firewall(int db_server_port, int firewall_port)
 {
 	simple_comm server;
@@ -22,7 +20,7 @@ void firewall::start_firewall(int db_server_port, int firewall_port)
 			continue;
 		}
 		thread t([](int _client, int port, sockaddr_in _client_addr, bool _mode){
-			db_comm dc(_client, port, _client_addr, _mode);
+			db_comm dc(_client, port, _client_addr, _mode, shared_ptr<filter>( new naive_filter ( shared_ptr<sql_parser>(new naive_sql_parser) )));
 			dc.handle_db_connection();
 		}, client, db_server_port, client_addr, is_learning.load());
 		t.detach();

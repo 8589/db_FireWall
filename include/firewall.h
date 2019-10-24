@@ -1,10 +1,14 @@
 #ifndef _FIREWALL_H_
 #define _FIREWALL_H_
 
+//#include "llheader.h"
 #include "db_comm.h"
 #include "ui_comm.h"
-#include "config.h"
+#include "naive_filter.h"
+#include "naive_sql_parser.h"
 #include <thread>
+#include <memory>
+
 
 using namespace std;
 

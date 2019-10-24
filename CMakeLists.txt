@@ -20,5 +20,5 @@ link_directories(./lib)
 add_subdirectory(src)
 
 add_executable(db_FireWall ${db_FireWall_SRC})
-target_link_libraries(db_FireWall CJsonObject sql_parser db_firewall pthread mysqlclient z c dl)
+target_link_libraries(db_FireWall CJsonObject base_sql_parser  db_firewall pthread mysqlclient z c dl)
 

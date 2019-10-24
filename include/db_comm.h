@@ -5,6 +5,7 @@
 #include "filter.h"
 #include <vector>
 #include <string>
+#include <memory>
 
 using namespace std;
 
@@ -20,12 +21,15 @@ private:
 	sockaddr_in client_addr;	//get the ip of client
 	bool mode;	//learing or prtection mode
 	int eof_num;
-	filter f;
+	shared_ptr<filter> f;
 
 public:
 	//sql_comm();
-	db_comm(int client_fd, int _db_port, sockaddr_in _client_addr, bool _mode):
-		client_fd(client_fd),db_port(_db_port),client_addr(_client_addr),mode(_mode){this->eof_num = 2;}
+	db_comm(int client_fd, int _db_port, sockaddr_in _client_addr, bool _mode, shared_ptr<filter> _f):
+		client_fd(client_fd),db_port(_db_port),client_addr(_client_addr),mode(_mode),f(_f)
+		{
+			this->eof_num = 2;
+		}
 	~db_comm()
 	{
 		server.close_socket(this->client_fd, &(this->client_addr));

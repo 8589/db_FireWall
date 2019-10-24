@@ -1,8 +1,8 @@
-#include "sql_parser.h"
+#include "base_sql_parser.h"
 #include <string>
 #include <cstring>
 using namespace std;
-sql_parser::sql_parser(const char *sql, int _size)
+base_sql_parser::base_sql_parser(const char *sql, int _size)
 {
 	memset(this->content, 0, sizeof(this->content));
 	memcpy(this->content, sql, _size);
@@ -10,7 +10,7 @@ sql_parser::sql_parser(const char *sql, int _size)
     this->_now = 0;
     this->_end = _size;
 }
-int sql_parser::LexerInput(char* buf, int max_size)
+int base_sql_parser::LexerInput(char* buf, int max_size)
 {
 	if(this->_now == this->_end)	return 0;
 	else if(this->_end - this->_now >= max_size - 1)
@@ -29,7 +29,7 @@ int sql_parser::LexerInput(char* buf, int max_size)
 	}
 	return 0;
 }
-void sql_parser::LexerError(const char* msg)
+void base_sql_parser::LexerError(const char* msg)
 {
 	cout<<"error:"<< msg << " at line:" << lineno() <<endl;
 }
