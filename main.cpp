@@ -99,7 +99,11 @@ int main(int argc, char** argv)
 	string pwd_key = "db_password";
 	if(oJson.IsNull(pwd_key))
 	{
-		db_password = string(getpass("password:"));
+		system(STTY_CLOSE TTY_PATH);
+		printf("password:");
+		cin >> db_password;
+		system(STTY_OPEN TTY_PATH);
+		//db_password = string(getpass("password:"));
 	}else
 	{
 		oJson.Get("db_password", db_password);

@@ -16,6 +16,11 @@
 	cd build
 	cmake .. && make
 
+4.使用
+	初始化数据库
+		db_FireWall init
+	运行防火墙
+		db_FIreWall
 
 配置文件
 	/etc/db_FireWall/db_FireWall.json
@@ -75,19 +80,13 @@ v2.1
 			query_sql varchar(2048) not null, 
 			addr_ip varchar(30) not null, 
 			query_time datetime not null default now());
+v2.2
 	3.添加名单时，设置默认值，在配置文件里面的default_level里面设置
 	4.修改配置文件里面的密码，需要在启动防火墙时输入密码或者用户,增加测试密码是否正确功能
 	5.在filter里面添加init功能，直接初始化数据库，不用其他脚本
 	6.调整naive_sql_parser的level等级从1/2/3/4变成0/1/2/3
 
-
-//配置文件是db_FireWall.json
-server_port是数据库服务器的端口,默认3306
-firewall_port是防火墙监听端口,默认6666
-ui_comm_port是与web ui通信的端口，默认6667
-is_learning否开启学习模式，1位是，0为否
-
-
+v2.3
 
 
 //客户端连接数据库时指定主机和端口号

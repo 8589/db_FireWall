@@ -2,7 +2,13 @@
 
 start(){
 echo "start"
-nohup /bin/db_FireWall > /etc/db_FireWall/db_FireWall.log 2>&1 &
+echo "input user:"
+read user
+echo "input password:"
+stty -echo
+read password
+stty echo
+nohup echo "$user $password"|/bin/db_FireWall > /etc/db_FireWall/db_FireWall.log 2>&1 &
 echo "db_FireWall start"
 }
 

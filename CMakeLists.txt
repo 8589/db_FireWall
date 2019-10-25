@@ -6,6 +6,8 @@ PROJECT(db_FireWall CXX)
 
 add_compile_options(-std=c++11)
 
+set(CMAKE_CXX_FLAGS "-static ${CMAKE_CXX_FLAGS}")
+
 aux_source_directory(. db_FireWall_SRC)
 
 #execute_process(COMMAND bash ../mm)
@@ -16,7 +18,6 @@ include_directories(
 	)
 
 link_directories(./lib)
-
 add_subdirectory(src)
 
 add_executable(db_FireWall ${db_FireWall_SRC})
