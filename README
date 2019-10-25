@@ -81,12 +81,16 @@ v2.1
 			addr_ip varchar(30) not null, 
 			query_time datetime not null default now());
 v2.2
-	3.添加名单时，设置默认值，在配置文件里面的default_level里面设置
-	4.修改配置文件里面的密码，需要在启动防火墙时输入密码或者用户,增加测试密码是否正确功能
-	5.在filter里面添加init功能，直接初始化数据库，不用其他脚本
-	6.调整naive_sql_parser的level等级从1/2/3/4变成0/1/2/3
+	1.添加名单时，设置默认值，在配置文件里面的default_level里面设置
+	2.修改配置文件里面的密码，需要在启动防火墙时输入密码或者用户,增加测试密码是否正确功能
+	3.在filter里面添加init功能，直接初始化数据库，不用其他脚本
+	4.调整naive_sql_parser的level等级从1/2/3/4变成0/1/2/3
 
 v2.3
+	修复service脚本启动时的重定向输入问题，输入密码的问题
+
+	
+
 
 
 //客户端连接数据库时指定主机和端口号
