@@ -1,2 +1,0 @@
-1
-select * from white_list where sql_cmd = "select * from a where user = \"a\"";
