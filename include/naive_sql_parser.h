@@ -15,7 +15,7 @@ class naive_sql_parser : public sql_parser
 private:
 public:
 	naive_sql_parser():sql_parser(){
-
+		
 	};
 	~naive_sql_parser(){
 

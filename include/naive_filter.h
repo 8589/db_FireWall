@@ -27,15 +27,25 @@ public:
 		(this->sc).close();
 	}
 
-	virtual bool is_legal_and_add_log(string user, string _sql, string ip);
+	virtual bool is_legal_and_add_log(const string &user, const string &_sql, const string &ip);
 
-	virtual void add_white_list(string user, string _sql, string ip);
+	virtual void add_white_list(const string &user, const string &_sql, const string &ip);
 
-	bool query_is_legal(string user, vector<string>& rule, string ip);
+	bool query_is_legal(const string &user, vector<string>& rule, const string &ip);
 
-	void add_white_list(string user, string _sql, string rule, int level, string ip);
+	void add_white_list(const string &user, const string &_sql, const string &rule, int level, const string &ip, int flag);
+	void add_white_list(const string &user, int is_all_user, const string &_sql, const string &ip, int is_all_ip, int _default_level);
 
-	void add_illegal_query(string user, string sql, string ip);
+
+	void add_illegal_query(const string &user, const string &sql_cmd, const string &ip);
+
+
+	//operation
+	void parse(const string &_sql, std::vector<string> &v);
+	void insert_to_db(const string &_sql, const string &user, int is_all_user, const string &ip, int is_all_ip);
+	void remove_from_list(const string &_sql, int level, const string &user, const string &ip, int which_list);
+	void delete_from_db(const string &_sql, const string &user, const string &ip);
+	void add_to_list(const string &_sql, int level, const string &user, const string &ip, int which_list);
 
 	static void init_db();
 

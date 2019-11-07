@@ -3,6 +3,11 @@
 
 #include "simple_comm.h"
 #include "connector.h"
+#include "naive_filter.h"
+#include "naive_sql_parser.h"
+#include <string>
+
+using namespace std;
 
 
 extern atomic<bool> is_learning;
@@ -16,13 +21,20 @@ private:
 	logger log;
 	char buff[BUFFSIZE];
 	connector conn;
+	shared_ptr<naive_filter> sp;
 public:
+	ui_comm(){
+		sp = shared_ptr<naive_filter>( new naive_filter ( shared_ptr<sql_parser>(new naive_sql_parser) ) );
+	}
+	ui_comm(int _client, int _db_port):client_fd(_client),db_port(_db_port){
+		sp = shared_ptr<naive_filter>( new naive_filter ( shared_ptr<sql_parser>(new naive_sql_parser) ) );
+	};
 
 	~ui_comm(){
 		server.close_socket(this->client_fd);
 		server.close_socket();
 	}
-	ui_comm(int _client, int _db_port):client_fd(_client),db_port(_db_port){};
+	
 
 	void handle_ui_connection();
 
@@ -35,6 +47,7 @@ public:
 	int recv_a_packet(string& recv_msg, int _socket_);
 
 	int send_result(char result);
+	int send_result(string result);
 
 };
 

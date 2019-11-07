@@ -12,7 +12,8 @@ using namespace std;
 class sql_parser
 {
 public:
-	sql_parser(){};
+	sql_parser(){
+	};
 	virtual ~sql_parser(){};
 
 	virtual void parse_sql(string _sql, int level, string &rule){rule.clear();};

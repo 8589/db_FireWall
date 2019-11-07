@@ -20,7 +20,7 @@ int ui_comm::handle_packet(string& msg)
 			return this->switch_mode(msg);
 		}
 		//insert a rule
-		else if(msg[4] == '\2')
+		else if(msg[4] >= '\2' && msg[4] <= '\6')
 		{
 			return this->update_a_rule(msg);
 		}
@@ -84,28 +84,59 @@ int ui_comm::switch_mode(string& msg)
 int ui_comm::update_a_rule(string& msg)
 {
 	log.debug("update a rule");
+	//printf("%d\n", msg[4]);
 	if(msg.size() >= 7)
 	{
 		int level = msg[5];
-		int update = msg[6];
+		int flag = msg[6];
 		string user = string(msg, 7, 30);
+		user = string(user.c_str());
 		string addr_ip = string(msg, 7+30, 30);
+		addr_ip = string(addr_ip.c_str());
 		string sql = string(msg, 7+30+30, msg.size()-7-30-30);
 
-		char msg[MSGSIZE];
-		sprintf(msg, "user: %s\naddr_ip:%s\nlevel: %d\nupdate: %d\nsql: %s\n",user.c_str(), addr_ip.c_str(), level,update,sql.c_str());
-		log.high_debug(msg);
+		char _msg[MSGSIZE];
+		sprintf(_msg, "user: %s\naddr_ip:%s\nlevel: %d\nflag: %d\nsql: %s\n",user.c_str(), addr_ip.c_str(), level,flag,sql.c_str());
+		log.high_debug(_msg);
+		
+		//printf("%d\n", msg[4]);
+		//parse
+		if(msg[4] == '\2'){
+			log.debug("parse");
+			vector<string> res;
+			//
+			sp->parse(sql, res);
 
-		(this->conn).connect_to_db();
-		if(update && 2)
-		{
-			(this->conn).insert_to_a_list(user, sql, level, addr_ip, (update&1)+1);
+			if(this->send_result(res.size()) < 0)
+				return -1;
+			for(int i=0;i<res.size();i++){
+				if(this->send_result(res[i]) < 0)
+					return -1;
+			}
 		}
-		else
-		{
-			(this->conn).remove_from_a_list(user, sql, addr_ip, (update&1)+1);
+		//insert
+		else if(msg[4] == '\3'){
+			log.debug("insert");
+			sp->insert_to_db(sql, user, level&(1<<3), addr_ip, level&(1<<4));
 		}
-		(this->conn).close();
+		//delete
+		else if(msg[4] == '\4'){
+			log.debug("delete");
+			sp->delete_from_db(sql, user, addr_ip);
+		}
+		//remove 
+		else if(msg[4] == '\5'){
+			log.debug("remove");
+			sp->remove_from_list(sql, level, user, addr_ip, flag);
+		}
+		//add
+		else if(msg[4] == '\6'){
+			log.debug("add");
+			sp->add_to_list(sql, level, user, addr_ip, flag);
+		}
+		else{
+			log.debug("ddddddddddddamn");
+		}
 		if(this->send_result(1) < 0)
 			return -1;
 	}
@@ -129,7 +160,11 @@ int ui_comm::recv_a_packet(string& recv_msg, int _socket_)
 
 	server.read_msg(this->buff, _size);
 
-	unsigned int msg_size = (*((unsigned int*)buff))&(0xffffffffu);
+	//unsigned int msg_size = (*((unsigned int*)buff))&(0xffffffffu);
+	unsigned int msg_size = 0;
+	for(int i=3;i>=0;i--){
+		msg_size = msg_size*256 + (unsigned char)*(buff+i);
+	}
 
 	//unsigned int msg_index = (unsigned char)(*(buff+3));
 	//printf("$$%u\n", msg_index);
@@ -156,6 +191,22 @@ int ui_comm::send_result(char result)
 {
 	char res = result;
 	if(server.send_msg(this->client_fd, &res, 1) < 0)
+		return -1;
+	return 1;
+}
+
+int ui_comm::send_result(string result)
+{
+	int sz = result.size();
+	char ssz[4];
+	for(int i=0;i<4;i++){
+		ssz[i] = sz % 256;
+		sz /= 256;
+		//printf("%d\n", ssz[i]);
+	}
+	//char + string 截断0
+	string res = string(ssz,4) + result;
+	if(server.send_msg(this->client_fd, res.c_str(), res.size()) < 0)
 		return -1;
 	return 1;
 }

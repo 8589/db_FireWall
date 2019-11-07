@@ -23,6 +23,6 @@ include_directories(
 link_directories(./lib)
 add_subdirectory(src)
 
-add_executable(db_FireWall ${db_FireWall_SRC})
+#add_executable(db_FireWall ${db_FireWall_SRC})
+add_executable(db_FireWall main.cpp)
 target_link_libraries(db_FireWall CJsonObject base_sql_parser  db_firewall mysqlclient z c dl)
-
