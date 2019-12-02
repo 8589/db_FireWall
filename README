@@ -97,6 +97,8 @@ v2.3.2
 	添加安装功能
 v2.3.3
 	修复bug:filter和naive_filter虚函数参数不一致问题
+v2.3.4
+	修复ip和user标志位错乱问题,ip是第4位,user是第五位
 	
 
 

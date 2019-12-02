@@ -117,7 +117,7 @@ int ui_comm::update_a_rule(string& msg)
 		//insert
 		else if(msg[4] == '\3'){
 			log.debug("insert");
-			sp->insert_to_db(sql, user, level&(1<<3), addr_ip, level&(1<<4));
+			sp->insert_to_db(sql, user, level&(1<<4), addr_ip, level&(1<<3));
 		}
 		//delete
 		else if(msg[4] == '\4'){

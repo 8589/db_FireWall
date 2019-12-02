@@ -80,11 +80,11 @@ class fw_comm
 		$level_flag = $level;
 		if($is_all_user == true)
 		{
-			$level_flag = $level_flag | (1<<3);
+			$level_flag = $level_flag | (1<<4);
 		}
 		if($is_all_addr_ip == true)
 		{
-			$level_flag = $level_flag | (1<<4);
+			$level_flag = $level_flag | (1<<3);
 		}
 		$msg = $msg.chr($level_flag);
 		$msg = $msg.chr($flag);
