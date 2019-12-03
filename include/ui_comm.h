@@ -4,8 +4,10 @@
 #include "simple_comm.h"
 #include "connector.h"
 #include "naive_filter.h"
+#include "CJsonObject.hpp"
 #include "naive_sql_parser.h"
 #include <string>
+#include <fstream>
 
 using namespace std;
 
@@ -44,10 +46,19 @@ public:
 
 	int update_a_rule(string& msg);
 
+	int handle_config(const string& msg);
+
+	string read_config();
+
+	void change_config(const string& config);
+
 	int recv_a_packet(string& recv_msg, int _socket_);
 
 	int send_result(char result);
+
 	int send_result(string result);
+
+
 
 };
 

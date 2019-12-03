@@ -1,6 +1,3 @@
-
-
-
 <?php 
 
 class fw_comm
@@ -15,6 +12,46 @@ class fw_comm
 	function __construct($_addr_ip="127.0.0.1", $_port=6667) {
 		$this->addr_ip = $_addr_ip;
        	$this->port = $_port;
+   }
+   public function open_firewall($user, $password){
+   		$cmd = "nohup pkill rinetd &";
+   		exec($cmd, $array, $ret);
+   		if($ret != 0){
+   			return $ret;
+   		}
+   		$cmd = "echo '".$user." ".$password."'|nohup /etc/init.d/db_FireWall start &";
+   		exec($cmd, $array, $ret);
+   		return $ret == 0;
+   }
+   public function close_firewall(){
+   		$cmd = "nohup /etc/init.d/db_FireWall stop &";
+   		exec($cmd, $array, $ret);
+   		if($ret != 0){
+   			return $ret;
+   		}
+   		$cmd = "nohup rinetd -c /etc/rinetd.conf &";
+   		exec($cmd, $array, $ret);
+   		return $ret == 0;
+   }
+   public function restart_firewall($user, $password){
+   		close_firewall();
+   		return open_firewall($user, $password);
+   }
+
+   public function query_firewall(){
+   		$cmd = "ps -aux|grep 'db_FireWall'|grep -v 'grep'";
+   		exec($cmd, $array, $ret);
+   		return count($array)!=0;
+   }
+   public function read_config(){
+   		$msg = "\1\0\0\0\7";
+   		return $this->comm_with_fw($msg);
+   }
+   public function write_config($config){
+   		$msg = $this->int_to_string_by_bit(strlen($config)+1);
+   		$msg .=chr(8);
+   		$msg .= $config;
+   		return $this->comm_with_fw($msg);
    }
    /*
 	public function switch_mode($mode)
@@ -186,6 +223,11 @@ class fw_comm
 
 
 $client = new fw_comm("127.0.0.1",6667);
+//print_r($client->query_firewall());
+//print_r($client->open_firewall("root", "123456"));
+print_r($client->close_firewall());
+//print_r($client->read_config());
+//print($client->write_config('{"server_port":3306,"firewall_port":6666,"ui_comm_port":6667,"is_learning":1,"LOG_LEVEL":0,"db_user":null,"db_password":null,"db_name":"LL_firewall","time_out":60,"listen_queue_size":1024,"default_level":0,"test":1}'));
 
 /*
 //test parse

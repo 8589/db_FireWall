@@ -25,6 +25,9 @@ int ui_comm::handle_packet(string& msg)
 			return this->update_a_rule(msg);
 		}
 		//remaining
+		else if(msg[4] == 7 || msg[4] == 8){
+			return this->handle_config(msg);
+		}
 		else
 		{
 			log.debug("do nothing!");
@@ -135,7 +138,7 @@ int ui_comm::update_a_rule(string& msg)
 			sp->add_to_list(sql, level, user, addr_ip, flag);
 		}
 		else{
-			log.debug("ddddddddddddamn");
+			log.debug("ddddddddddddebug");
 		}
 		if(this->send_result(1) < 0)
 			return -1;
@@ -148,7 +151,41 @@ int ui_comm::update_a_rule(string& msg)
 	return 1;
 }
 
+int ui_comm::handle_config(const string& msg)
+{
+	if(msg[4] == 7){
+		//read config and send to ui
+		log.debug("read config");
+		this->send_result(2);
+		this->send_result(string());
+		return this->send_result(this->read_config());
+	}else if(msg[4] == 8){
+		// recv config and write to file
+		log.debug("change config");
+		this->change_config(string(msg, 5, msg.size()-5));
+		return this->send_result(1);
+	}else{
+		return 1;
+	}
+}
 
+string ui_comm::read_config()
+{
+	ifstream ifs("/etc/db_FireWall/db_FireWall.json");
+	string res;
+	string _s;
+	while(getline(ifs, _s)){
+		res += _s;
+	}
+	return res;
+}
+
+void ui_comm::change_config(const string& config)
+{
+	ofstream ofs("/etc/db_FireWall/db_FireWall.json");
+	ofs << neb::CJsonObject(config).ToFormattedString() << endl;
+	ofs.close();
+}
 
 
 int ui_comm::recv_a_packet(string& recv_msg, int _socket_)

@@ -124,8 +124,8 @@ void naive_filter::init_db()
 	simple_conn ssc;
 	ssc.connect_to("127.0.0.1",db_user.c_str(),db_password.c_str(),db_name.c_str());
 	
-	string sql_create_db = "create database if not exists LL_firewall;";
-	ssc.query(sql_create_db.c_str());
+	//string sql_create_db = "create database if not exists LL_firewall;";
+	//ssc.query(sql_create_db.c_str());
 	string sql_delete_white_list = "drop table if exists white_list;";
 	ssc.query(sql_delete_white_list.c_str());
     string sql_create_white_list = "create table if not exists white_list ("
