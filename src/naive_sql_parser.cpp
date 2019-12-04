@@ -1,6 +1,9 @@
 #include "naive_sql_parser.h"
 
-
+#define NUM_SIG		"n\1um"
+#define STR_SIG		"s\1tr"
+#define COL_SIG		"c\1ol"
+#define TAB_SIG		"t\1ab"
 
 void naive_sql_parser::parse_sql(string _sql, int level, string &rule)
 {
@@ -69,8 +72,8 @@ void naive_sql_parser::parse_sql_level_1(string _sql, string &rule)
 	while((ret = sp->yylex()))
 	{
 		if(ret == EMPTY)			rule += " ";	//ss << " ";
-		else if(ret == NUMBER)		rule += "num";	//ss << "num";
-		else if(ret == STRING) 		rule += "str";	//ss << "str";
+		else if(ret == NUMBER)		rule += NUM_SIG;	//ss << "num";
+		else if(ret == STRING) 		rule += STR_SIG;	//ss << "str";
 		else
 			rule +=(sp->YYText());		//ss << (sp->YYText());
 	}
@@ -88,8 +91,8 @@ void naive_sql_parser::parse_sql_level_2(string _sql, string &rule)
 	while((ret = sp->yylex()))
 	{
 		if(ret == EMPTY)			rule += " ";	//ss << " ";
-		else if(ret == NUMBER)		rule += "num";	//ss << "num";
-		else if(ret == STRING) 		rule += "str";	//ss << "str";
+		else if(ret == NUMBER)		rule += NUM_SIG;	//ss << "num";
+		else if(ret == STRING) 		rule += STR_SIG;	//ss << "str";
 		else if(ret == ID)
 		{
 			if(last==DESC || last==TABLE || last==FROM || last==INTO || last==UPDATE || last==ON || last==-1 || last==VIEW || last==REFERENCES
@@ -100,7 +103,7 @@ void naive_sql_parser::parse_sql_level_2(string _sql, string &rule)
 			}
 			else
 			{
-				rule += "col";					//ss << "col";
+				rule += COL_SIG;					//ss << "col";
 				llast = COL;
 			}
 		}
@@ -108,7 +111,7 @@ void naive_sql_parser::parse_sql_level_2(string _sql, string &rule)
 		{
 			if(last == SELECT)
 			{
-				rule += "col";					//ss << "col";
+				rule += COL_SIG;					//ss << "col";
 				llast = COL;
 			}
 			else
@@ -143,19 +146,19 @@ void naive_sql_parser::parse_sql_level_3(string _sql, string &rule)
 	while((ret = sp->yylex()))
 	{
 		if(ret == EMPTY)			rule += " ";	//ss << " ";
-		else if(ret == NUMBER)		rule += "num";	//ss << "num";
-		else if(ret == STRING) 		rule += "str";	//ss << "str";
+		else if(ret == NUMBER)		rule += NUM_SIG;	//ss << "num";
+		else if(ret == STRING) 		rule += STR_SIG;	//ss << "str";
 		else if(ret == ID)
 		{
 			if(last==DESC || last==TABLE || last==FROM || last==INTO || last==UPDATE || last==ON || last==-1 || last==VIEW || last==REFERENCES
 				|| (last==COMMA && llast==TAB) || last == JOIN || (last==ID&&llast==TAB))
 			{
-				rule += "tab";					// ss << "tab";
+				rule += TAB_SIG;					// ss << "tab";
 				llast = TAB;
 			}
 			else
 			{
-				rule += "col";					//ss << "col";
+				rule += COL_SIG;					//ss << "col";
 				llast = COL;
 			}
 		}
@@ -163,7 +166,7 @@ void naive_sql_parser::parse_sql_level_3(string _sql, string &rule)
 		{
 			if(last == SELECT)
 			{
-				rule += "col";					//ss << "col";
+				rule += COL_SIG;					//ss << "col";
 				llast = COL;
 			}
 			else
@@ -171,7 +174,7 @@ void naive_sql_parser::parse_sql_level_3(string _sql, string &rule)
 		}
 		else if(ret == TAB_DOT_COL)
 		{
-			rule += "tab.col";
+			rule += string(TAB_SIG)+"."+COL_SIG;		//"tab.col";
 		}
 		else
 			rule +=(sp->YYText());				//ss << (sp->YYText());

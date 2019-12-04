@@ -6,14 +6,14 @@
 
 "is_learning":1,
 
-"LOG_LEVEL":0,
+"LOG_LEVEL":2,
 "db_user":null,
 "db_password":null,
-"db_name":"LL_firewall",
+"db_name":"mysql",
 
 
 
-"time_out":60,
+"time_out":600,
 "listen_queue_size":1024,
-"default_level":0
+"default_level":-1
 }
