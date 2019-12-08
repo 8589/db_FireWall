@@ -20,14 +20,14 @@ int ui_comm::handle_packet(string& msg)
 			return this->switch_mode(msg);
 		}
 		//insert a rule
-		else if(msg[4] >= '\2' && msg[4] <= '\6')
+		else if(msg[4] >= '\2' && msg[4] < 32)
 		{
 			return this->update_a_rule(msg);
 		}
-		//remaining
-		else if(msg[4] == 7 || msg[4] == 8){
+		else if(msg[4] >=32 || msg[4] <40){
 			return this->handle_config(msg);
 		}
+		//remaining
 		else
 		{
 			log.debug("do nothing!");
@@ -137,6 +137,11 @@ int ui_comm::update_a_rule(string& msg)
 			log.debug("add");
 			sp->add_to_list(sql, level, user, addr_ip, flag);
 		}
+		//add2
+		else if(msg[4] == 7){
+			log.debug("add2");
+			sp->add_to_list2(sql, level, user, addr_ip, flag);
+		}
 		else{
 			log.debug("ddddddddddddebug");
 		}
@@ -153,13 +158,13 @@ int ui_comm::update_a_rule(string& msg)
 
 int ui_comm::handle_config(const string& msg)
 {
-	if(msg[4] == 7){
+	if(msg[4] == 32){
 		//read config and send to ui
 		log.debug("read config");
 		this->send_result(2);
 		this->send_result(string());
 		return this->send_result(this->read_config());
-	}else if(msg[4] == 8){
+	}else if(msg[4] == 33){
 		// recv config and write to file
 		log.debug("change config");
 		this->change_config(string(msg, 5, msg.size()-5));

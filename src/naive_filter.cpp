@@ -18,7 +18,7 @@ bool naive_filter::is_legal_and_add_log(const string &user, const string &_sql, 
 bool naive_filter::query_is_legal(const string &user, vector<string>& rule, const string &ip)
 {
 	vector<vector<string> > ans;
-	string query_sql = "select count(*) from white_list where rule in (";
+	string query_sql = "select id from white_list where rule in (";
 	for(int i=0;i<rule.size();i++){
 		if(i == rule.size()-1){
 			query_sql += "\"" + rule[i] + "\"";
@@ -27,9 +27,10 @@ bool naive_filter::query_is_legal(const string &user, vector<string>& rule, cons
 			query_sql += "\"" + rule[i] + "\",";
 		}
 	}
-	query_sql += ") and ((level&8) or addr_ip=\"" + ip + "\") and ((level&16) or user=\"" + user + "\") and flag&1 and (not flag&2);";
+	query_sql += ") and ((level&8) or addr_ip=\"" + ip + "\") and ((level&16) or user=\"" + user + "\") and flag&1 and (not flag&2) limit 1;";
 	ans = (this->sc).query(query_sql.c_str());
-	if(atoi(ans[0][0].c_str()))
+	//if(atoi(ans[0][0].c_str()))
+	if(ans.size()>0)
 		return true;
 	return false;
 }
@@ -116,6 +117,16 @@ void naive_filter::add_to_list(const string &_sql, int level, const string &user
 	memset(query_sql,0,sizeof(query_sql));
 	snprintf(query_sql, BUFFSIZE, "update white_list set flag=flag|%d where sql_cmd=\"%s\" and user=\"%s\" and addr_ip=\"%s\" and level&7=%d;",
 		(1<<(which_list)), _sql_.c_str(), user.c_str(), ip.c_str(), level);
+	(this->sc).query(query_sql);
+}
+void naive_filter::add_to_list2(const string &_sql, int level, const string &user, const string &ip, int which_list)
+{
+	string _sql_;
+	this->sp->parse_sql(_sql, 0, _sql_);
+	char query_sql[BUFFSIZE];
+	memset(query_sql,0,sizeof(query_sql));
+	snprintf(query_sql, BUFFSIZE, "update white_list set flag=flag|%d, level=level|%d where sql_cmd=\"%s\" and user=\"%s\" and addr_ip=\"%s\" and level&7=%d;",
+		(1<<(which_list)), level&24, _sql_.c_str(), user.c_str(), ip.c_str(), level&7);
 	(this->sc).query(query_sql);
 }
 

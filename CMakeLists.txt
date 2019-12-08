@@ -22,6 +22,7 @@ include_directories(
 
 link_directories(./lib)
 add_subdirectory(src)
+add_subdirectory(test)
 
 #add_executable(db_FireWall ${db_FireWall_SRC})
 add_executable(db_FireWall main.cpp)

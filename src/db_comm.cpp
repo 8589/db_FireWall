@@ -102,10 +102,17 @@ int db_comm::select_one_comm(string& s)
 			
 	}
 	if(FD_ISSET(server.get_socket(), &rset)){
-		int _size = this->recv_a_packet(s, server.get_socket());
+		// int _size = this->recv_a_packet(s, server.get_socket());
+		//add 3
+		char t_buff[BUFFSIZE];
+		int _size = server.recv_msg();
+		server.read_msg(t_buff, _size);
 		if(_size <= 0)
 			return _size;
-		if(server.send_msg(client_fd, s.c_str(), s.size()) < 0)
+		// if(server.send_msg(client_fd, s.c_str(), s.size()) < 0)
+		// 	return -1;
+		//add 2
+		if(server.send_msg(client_fd, t_buff, _size) < 0)
 			return -1;
 	}
 	return 1;
@@ -116,7 +123,6 @@ int db_comm::check_sql(string& recv_msg){
 		string sql = string(recv_msg,5,recv_msg.size()-5);
 		log.high_debug(sql.c_str());
 		//to open filter
-
 		if(this->mode){
 			(this->f)->add_white_list(this->user, sql, string(inet_ntoa((this->client_addr).sin_addr)));
 		}else{

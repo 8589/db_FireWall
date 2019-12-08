@@ -46,6 +46,7 @@ public:
 	void remove_from_list(const string &_sql, int level, const string &user, const string &ip, int which_list);
 	void delete_from_db(const string &_sql, const string &user, const string &ip);
 	void add_to_list(const string &_sql, int level, const string &user, const string &ip, int which_list);
+	void add_to_list2(const string &_sql, int level, const string &user, const string &ip, int which_list);
 
 	static void init_db();
 

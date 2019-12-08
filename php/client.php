@@ -44,12 +44,13 @@ class fw_comm
    		return count($array)!=0;
    }
    public function read_config(){
-   		$msg = "\1\0\0\0\7";
+   		$msg = "\1\0\0\0";
+   		$msg .=chr(32);
    		return $this->comm_with_fw($msg);
    }
    public function write_config($config){
    		$msg = $this->int_to_string_by_bit(strlen($config)+1);
-   		$msg .=chr(8);
+   		$msg .=chr(33);
    		$msg .= $config;
    		return $this->comm_with_fw($msg);
    }
@@ -105,8 +106,12 @@ class fw_comm
 	public function remove_from_list($sql, $level, $user, $addr_ip, $whitch_list){
 		return $this->update_a_rule($sql, 0, $addr_ip, 0, $user, $level, "\5", $whitch_list);
 	}
+	
 	public function add_to_list($sql, $level, $user, $addr_ip, $whitch_list){
 		return $this->update_a_rule($sql, 0, $addr_ip, 0, $user, $level, "\6", $whitch_list);
+	}
+	public function add_to_list2($sql, $level, $user, $is_all_user, $addr_ip, $is_all_addr_ip, $whitch_list){
+		return $this->update_a_rule($sql, $is_all_user, $addr_ip, $is_all_addr_ip, $user, $level, chr(7), $whitch_list);
 	}
 	
 	private function update_a_rule($sql, $is_all_addr_ip, $addr_ip, $is_all_user, $user, $level, $type, $flag)
@@ -223,10 +228,11 @@ class fw_comm
 
 
 $client = new fw_comm("127.0.0.1",6667);
+
 //print_r($client->query_firewall());
 //print_r($client->open_firewall("root", "123456"));
 //print_r($client->close_firewall());
-echo $client->switch_mode(0);
+#echo $client->switch_mode(0);
 //print_r($client->read_config());
 //print($client->write_config('{"server_port":3306,"firewall_port":6666,"ui_comm_port":6667,"is_learning":1,"LOG_LEVEL":0,"db_user":null,"db_password":null,"db_name":"LL_firewall","time_out":60,"listen_queue_size":1024,"default_level":0,"test":1}'));
 
