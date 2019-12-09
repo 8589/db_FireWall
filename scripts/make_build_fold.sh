@@ -11,5 +11,7 @@ do
 	#echo "$main_src$suffix"
 	mkdir $main_src$suffix
 	cd $main_src$suffix
-	cmake .. && make
+	echo `pwd`
+	cmake ..
+       	make
 done

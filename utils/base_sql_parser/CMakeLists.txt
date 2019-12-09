@@ -5,9 +5,11 @@ PROJECT(base_sql_parser CXX)
 
 add_compile_options(-std=c++11)
 
+execute_process(COMMAND bash ../mm)
+
 aux_source_directory(. base_sql_parser_SRC)
 
-execute_process(COMMAND bash ../mm)
+#execute_process(COMMAND bash ../mm)
 
 set(LIB_SRC ../../../lib)
 
