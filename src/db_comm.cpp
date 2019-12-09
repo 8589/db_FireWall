@@ -123,7 +123,7 @@ int db_comm::check_sql(string& recv_msg){
 		string sql = string(recv_msg,5,recv_msg.size()-5);
 		log.high_debug(sql.c_str());
 		//to open filter
-		if(this->mode){
+		if(is_learning){
 			(this->f)->add_white_list(this->user, sql, string(inet_ntoa((this->client_addr).sin_addr)));
 		}else{
 			if(!((this->f)->is_legal_and_add_log((this->user).c_str(), sql.c_str(), string(inet_ntoa((this->client_addr).sin_addr)))))

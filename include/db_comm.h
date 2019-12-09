@@ -8,7 +8,7 @@
 #include <memory>
 
 using namespace std;
-
+extern atomic<bool> is_learning;
 class db_comm
 {
 private:

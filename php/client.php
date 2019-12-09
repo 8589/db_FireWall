@@ -12,6 +12,11 @@ class fw_comm
 	function __construct($_addr_ip="127.0.0.1", $_port=6667) {
 		$this->addr_ip = $_addr_ip;
        	$this->port = $_port;
+       	$this->init();
+		$this->conn_to_fw();
+   }
+   function __destruct(){
+   		$this->close_conn();
    }
    public function open_firewall($user, $password){
    		$cmd = "nohup pkill rinetd &";
@@ -146,8 +151,8 @@ class fw_comm
 
 	private function comm_with_fw($msg)
 	{
-		$this->init();
-		$this->conn_to_fw();
+		// $this->init();
+		// $this->conn_to_fw();
 		$this->send_msg($msg, strlen($msg));
 		$res = $this->recv_msg();
 		if(ord($res) > 1){
@@ -157,7 +162,7 @@ class fw_comm
 			}
 			return $data;
 		}
-		$this->close_conn();
+		//$this->close_conn();
 		return $res == "\1";
 	}
 
@@ -228,6 +233,7 @@ class fw_comm
 
 
 $client = new fw_comm("127.0.0.1",6667);
+echo $client->switch_mode(1);
 
 //print_r($client->query_firewall());
 //print_r($client->open_firewall("root", "123456"));
@@ -247,10 +253,11 @@ for($i=0;$i<count($res);$i++){
 }
 */
 
-/*
+
 //test insert
-echo $client->insert_to_db("select * from white_list where sql_cmd = \"\"", "root" , 1,"127.0.0.1", 1);
-*/
+//for($i=0;$i<=10000;$i++)
+//	echo $client->insert_to_db("select * from white_list where sql_cmd = \"\"", "root" , 1,"127.0.0.1", 1);
+
 
 /*
 //test delete

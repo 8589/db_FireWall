@@ -1,13 +1,23 @@
 #include "ui_comm.h"
 
 
+// void ui_comm::handle_ui_connection()
+// {
+// 	string msg;
+// 	if(this->recv_a_packet(msg, this->client_fd) <= 0)
+// 		return;
+// 	//printf("###%lu\n",msg.size());
+// 	this->handle_packet(msg);
+// }
+
 void ui_comm::handle_ui_connection()
 {
 	string msg;
-	if(this->recv_a_packet(msg, this->client_fd) <= 0)
-		return;
-	//printf("###%lu\n",msg.size());
-	this->handle_packet(msg);
+	while(this->recv_a_packet(msg, this->client_fd) > 0){
+		this->handle_packet(msg);
+	}
+	//
+	
 }
 
 int ui_comm::handle_packet(string& msg)
