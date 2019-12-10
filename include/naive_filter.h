@@ -31,6 +31,7 @@ public:
 
 	virtual void add_white_list(const string &user, const string &_sql, const string &ip);
 
+	bool query_is_illegal(const string &user, vector<string>& rule, const string &ip);
 	bool query_is_legal(const string &user, vector<string>& rule, const string &ip);
 
 	void add_white_list(const string &user, const string &_sql, const string &rule, int level, const string &ip, int flag);

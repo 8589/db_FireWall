@@ -7,11 +7,32 @@ bool naive_filter::is_legal_and_add_log(const string &user, const string &_sql, 
 	int res = false;
 	vector<string> rule(this->sp->level_size(), string());
 	this->sp->parse_sql(_sql, rule);
+	//if(!(this->query_is_illegal(user, rule, ip)) && this->query_is_legal(user, rule, ip))
 	if(this->query_is_legal(user, rule, ip))
 	{
 		return true;
 	}
 	this->add_illegal_query(user, _sql, ip);
+	return false;
+}
+
+bool naive_filter::query_is_illegal(const string &user, vector<string>& rule, const string &ip)
+{
+	vector<vector<string> > ans;
+	string query_sql = "select id from white_list where rule in (";
+	for(int i=0;i<rule.size();i++){
+		if(i == rule.size()-1){
+			query_sql += "\"" + rule[i] + "\"";
+		}
+		else{
+			query_sql += "\"" + rule[i] + "\",";
+		}
+	}
+	query_sql += ") and ((level&8) or addr_ip=\"" + ip + "\") and ((level&16) or user=\"" + user + "\") and flag&2 limit 1;";
+	ans = (this->sc).query(query_sql.c_str());
+	//if(atoi(ans[0][0].c_str()))
+	if(ans.size()>0)
+		return true;
 	return false;
 }
 
