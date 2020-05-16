@@ -15,5 +15,8 @@
 
 "time_out":600,
 "listen_queue_size":1024,
-"default_level":-1
+"default_level":-1,
+
+"buffsize":2048,
+"is_log_illegal_query":1
 }

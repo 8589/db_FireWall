@@ -20,6 +20,9 @@ extern int default_level;
 extern int server_port;
 extern int firewall_port;
 extern int ui_comm_port;
+extern int buffsize;
+extern int is_log_illegal_query;
+
 
 #define TTY_PATH 			"/dev/tty"
 #define STTY_CLOSE          "stty raw -echo -F "
@@ -131,7 +134,14 @@ int main(int argc, char** argv)
 	oJson.Get("listen_queue_size", listen_queue_size);
 
 	oJson.Get("default_level", default_level);
+	oJson.Get("buffsize", buffsize);
+	if(buffsize <= 0 || buffsize >= (1<<24)){
+		fprintf(stderr, "buffsize is too big(>16M) or too small(<0)\n");
+		exit(1);
+	}
+	oJson.Get("is_log_illegal_query", is_log_illegal_query);
 
+printf("%d %d\n", buffsize, is_log_illegal_query);
 	
 	// thread t1([](){
 	// 	firewall fw;

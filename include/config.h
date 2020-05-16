@@ -18,6 +18,7 @@ extern int server_port;
 extern int firewall_port;
 extern int ui_comm_port;
 extern int buffsize;
+extern int is_log_illegal_query;
 
 
 

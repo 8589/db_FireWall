@@ -12,68 +12,66 @@ using namespace std;
 extern atomic<bool> is_learning;
 
 
-void handle_db_connection(int clientFd, sockaddr_in clientAddr);
+void handleDBConnection(int clientFd, sockaddr_in clientAddr);
+
 
 class DBComm{
 private:
-	int clientFd;
+
 	string user;
 	string ip;
-	unique_ptr<filter> upftr;
-public:
-	DBComm(int clientFd_, sockaddr_in clientAddr) : clientFd(clientFd_){
-		char ipBuf[INET_ADDRSTRLEN];
-		const  char *result = inet_ntop(AF_INET, &clientAddr.sin_addr, ipBuf, INET_ADDRSTRLEN);
-		if(!result){
-			ip = "unknown host";
-		}
-		ip = result;
+	string msg;
+
+
+	int clientFd;
+	int serverFd;
+
+	int epFd;
+
+	filter *ftr;
+
+	char *buf;
+	int bufSize;
+
+	
+
+	void init(){
+		clientFd = -1;
+		serverFd = -1;
+		epFd = -1;
+		ftr = nullptr;
+		buf = nullptr;
+		bufSize = 0;
+		ip = "unknown host";
 	}
-};
-
-class db_comm
-{
-private:
-	simple_comm server;		//handle network communication operation
-	int client_fd;			//the fd of the client socket
-	int db_port;			//the db server port
-	char buff[BUFFSIZE];	//the buff to receive packet
-	logger log;				// log
-	string user;			// client user
-	sockaddr_in client_addr;	//get the ip of client
-	bool mode;	//learing or prtection mode
-	int eof_num;
-	shared_ptr<filter> f;
-
-public:
-	//sql_comm();
-	db_comm(int client_fd, int _db_port, sockaddr_in _client_addr, bool _mode, shared_ptr<filter> _f):
-		client_fd(client_fd),db_port(_db_port),client_addr(_client_addr),mode(_mode),f(_f)
-		{
-			this->eof_num = 2;
-		}
-	~db_comm()
-	{
-		server.close_socket(this->client_fd, &(this->client_addr));
-		server.close_socket();
-	}
-
-	int handle_db_connection();
-
 	int login();
+	void epollCommunicate();
+	int IsMsgValid();
+	void handleIllegalMsg();
 
-	int select_one_comm(string& s);
-	int check_sql(string& recv_msg);
-	int one_comm();
+public:
+	DBComm(int clientFd_, sockaddr_in clientAddr){
+		init();
+		clientFd = clientFd_;
+		char ipBuf[INET_ADDRSTRLEN];
+		const char *result = inet_ntop(AF_INET, &clientAddr.sin_addr, ipBuf, INET_ADDRSTRLEN);
+		if(result){
+			ip = result;
+		}
+	}
+	
+	~DBComm(){
+		delete[] buf;
+		delete ftr;
+		if(clientFd >= 0)	close(clientFd);
+		if(serverFd >= 0)	close(serverFd);
+		if(epFd >= 0)	close(epFd);
+printf("close a connection from %s, user is %s\n", ip.c_str(), user.c_str());
+	}
 
-	int hanlde_illegal_query();
-
-	int client_to_server();
-
-	int server_to_client();
-
-	int recv_a_packet(string& recv_msg, int _socket_);
+	void handleDBConnection();
 
 };
+
 
 #endif
