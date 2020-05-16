@@ -4,7 +4,7 @@
 //#include "llheader.h"
 #include "db_comm.h"
 #include "ui_comm.h"
-#include "utils.h"
+
 #include "naive_filter.h"
 #include "naive_sql_parser.h"
 #include <thread>
@@ -21,21 +21,7 @@ extern int listen_queue_size;
 
 void start(int db_server_port, int firewall_port, int ui_comm_port);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void startFireWall();
 
 
 

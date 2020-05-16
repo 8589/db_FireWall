@@ -5,7 +5,8 @@
 #include <memory>
 #include "sql_parser.h"
 
-using namespace std;
+using std::string;
+using std::shared_ptr;
 
 class filter
 {
@@ -18,6 +19,10 @@ public:
 	virtual ~filter(){}
 
 	virtual bool is_legal_and_add_log(const string &user, const string &_sql, const string &ip){return 1;}
+
+	virtual bool is_legal(const string &user, const string &_sql, const string &ip){return 1;}
+
+	virtual void log_illegal(const string &user, const string &_sql, const string &ip){}
 	
 	virtual void add_white_list(const string &user, const string &_sql, const string &ip){}
 

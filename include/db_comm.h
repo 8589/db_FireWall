@@ -6,9 +6,31 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <arpa/inet.h>
 
 using namespace std;
 extern atomic<bool> is_learning;
+
+
+void handle_db_connection(int clientFd, sockaddr_in clientAddr);
+
+class DBComm{
+private:
+	int clientFd;
+	string user;
+	string ip;
+	unique_ptr<filter> upftr;
+public:
+	DBComm(int clientFd_, sockaddr_in clientAddr) : clientFd(clientFd_){
+		char ipBuf[INET_ADDRSTRLEN];
+		const  char *result = inet_ntop(AF_INET, &clientAddr.sin_addr, ipBuf, INET_ADDRSTRLEN);
+		if(!result){
+			ip = "unknown host";
+		}
+		ip = result;
+	}
+};
+
 class db_comm
 {
 private:

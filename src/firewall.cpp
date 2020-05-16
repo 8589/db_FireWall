@@ -3,11 +3,14 @@
 #include <string>
 #include <list>
 #include <sys/epoll.h>
-
-
-const int MAX_EVENT_NUMBER  = 2048;
+#include "utils.h"
 
 using namespace std;
+
+/*
+*********************************2.4***********************************
+
+const int MAX_EVENT_NUMBER  = 2048;
 
 struct Descriptor{
 	int fd;
@@ -133,17 +136,27 @@ printf("send a msg to client %d\n", msgSize);
 	}
 }
 
-
+*********************************2.4***********************************
+*/
 
 // /insert into t1 select a+20, b+20, c+20 from t1;
 
 
 
-
-
-
-
-
+void startFireWall(){
+	int listenFd = getTCPServer_e("", firewall_port, listen_queue_size);
+	FdGuard listenFdGuard(listenFd);
+	sockaddr_in addr;
+	socklen_t addrLen = sizeof(addr);
+	while(1){
+		int clientFd = accept(listenFd, (sockaddr*)&addr, &addrLen);
+		if(clientFd < 0){
+			continue;
+		}
+		thread t(handle_db_connection, clientFd, addr);
+		t.detach();
+	}
+}
 
 
 

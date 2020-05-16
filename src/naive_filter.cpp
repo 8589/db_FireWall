@@ -3,6 +3,7 @@
 
 bool naive_filter::is_legal_and_add_log(const string &user, const string &_sql, const string &ip)
 {
+	/*
 	string sql;
 	int res = false;
 	vector<string> rule(this->sp->level_size(), string());
@@ -14,6 +15,25 @@ bool naive_filter::is_legal_and_add_log(const string &user, const string &_sql, 
 	}
 	this->add_illegal_query(user, _sql, ip);
 	return false;
+	*/
+	if(is_legal(user, _sql, ip)){
+		return 1;
+	}
+	log_illegal(user, _sql, ip);
+	return 0;
+}
+
+bool naive_filter::is_legal(const string &user, const string &_sql, const string &ip){
+	string sql;
+	int res = false;
+	vector<string> rule(this->sp->level_size(), string());
+	this->sp->parse_sql(_sql, rule);
+	//if(!(this->query_is_illegal(user, rule, ip)) && this->query_is_legal(user, rule, ip))
+	return this->query_is_legal(user, rule, ip);
+}
+
+void naive_filter::log_illegal(const string &user, const string &_sql, const string &ip){
+	this->add_illegal_query(user, _sql, ip);
 }
 
 bool naive_filter::query_is_illegal(const string &user, vector<string>& rule, const string &ip)

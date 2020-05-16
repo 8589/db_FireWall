@@ -119,7 +119,7 @@ int getTCPClient_r(const string &ip, int port){
 		return -1;
 	}
 	if(connect(fd, (sockaddr*)&(addr), sizeof(sockaddr_in))){
-		myPrintError("socket");
+		myPrintError("connect");
 		return -1;
 	}
 	return fd;
@@ -161,9 +161,11 @@ int recvAMsg(int fd, string &result)
 
 
 
-void epollAddFd(int epfd, int fd, int events){
+int epollAddFd(int epfd, int fd, int events){
 	epoll_event ev;
 	ev.data.fd = fd;
 	ev.events = events;
-	epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev);
+	return epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev);
 }
+
+

@@ -29,6 +29,10 @@ public:
 
 	virtual bool is_legal_and_add_log(const string &user, const string &_sql, const string &ip);
 
+	virtual bool is_legal(const string &user, const string &_sql, const string &ip);
+
+	virtual void log_illegal(const string &user, const string &_sql, const string &ip);
+
 	virtual void add_white_list(const string &user, const string &_sql, const string &ip);
 
 	bool query_is_illegal(const string &user, vector<string>& rule, const string &ip);

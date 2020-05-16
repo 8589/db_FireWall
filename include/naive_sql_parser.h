@@ -17,7 +17,7 @@ public:
 	naive_sql_parser():sql_parser(){
 		
 	};
-	~naive_sql_parser(){
+	virtual~naive_sql_parser(){
 
 	};
 

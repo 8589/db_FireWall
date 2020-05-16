@@ -14,12 +14,16 @@ extern std::string db_name;
 extern int time_out;
 extern int listen_queue_size;
 extern int default_level;
+extern int server_port;
+extern int firewall_port;
+extern int ui_comm_port;
+extern int buffsize;
 
 
 
 #define	MAX_MSG_SIZE 	16777215
 #define MSGSIZE 		1024
-#define BUFFSIZE		4096
+#define BUFFSIZE		1024
 
 
 #define COL 			2001

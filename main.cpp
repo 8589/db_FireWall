@@ -17,6 +17,9 @@ extern std::string db_name;
 extern int time_out;
 extern int listen_queue_size;
 extern int default_level;
+extern int server_port;
+extern int firewall_port;
+extern int ui_comm_port;
 
 #define TTY_PATH 			"/dev/tty"
 #define STTY_CLOSE          "stty raw -echo -F "
@@ -51,7 +54,7 @@ int main(int argc, char** argv)
 
 	CJsonObject oJson(json);
 
-	int server_port;
+	
 	oJson.Get("server_port", server_port);
 	if(server_port < 0 || server_port > 65535)
 	{
@@ -59,7 +62,7 @@ int main(int argc, char** argv)
 		exit(0);
 	}
 
-	int firewall_port;
+	
 	oJson.Get("firewall_port",firewall_port);
 	if(firewall_port < 0 || firewall_port > 65535)
 	{
@@ -67,7 +70,7 @@ int main(int argc, char** argv)
 		exit(0);
 	}
 
-	int ui_comm_port;
+	
 	oJson.Get("ui_comm_port", ui_comm_port);
 	if(ui_comm_port < 0 || ui_comm_port > 65535)
 	{
@@ -130,24 +133,25 @@ int main(int argc, char** argv)
 	oJson.Get("default_level", default_level);
 
 	
-	// thread t1([&,server_port, firewall_port, ui_comm_port](){
+	// thread t1([](){
 	// 	firewall fw;
 	// 	logger log;
 	// 	log.high_debug("firewall start");
 	// 	fw.start_firewall(server_port, firewall_port);
 	// });
+	thread t1(startFireWall);
 	
-	// thread t2([&,server_port, firewall_port, ui_comm_port](){
-	// 	firewall fw;
-	// 	logger log;
-	// 	log.high_debug("web_UI start");
-	// 	fw.comm_with_web_UI(server_port, ui_comm_port);
-	// });
+	thread t2([](){
+		firewall fw;
+		logger log;
+		log.high_debug("web_UI start");
+		fw.comm_with_web_UI(server_port, ui_comm_port);
+	});
 
-	// t2.join();
-	// t1.join();
+	t2.join();
+	t1.join();
 	
-	start(server_port, firewall_port, ui_comm_port);
+	 //start(server_port, firewall_port, ui_comm_port);
 	
 	return 0;
 }

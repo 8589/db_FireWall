@@ -17,6 +17,6 @@ void exec_spd(const string& funcName, Func func, Args&... args){
 
 int main(int argc, char **argv){
 	char buf[1024];
-	snprintf(buf, 1024, "mysql -uroot -h127.0.0.1 -P%s -p123 < sql > log", argv[1]);
+	snprintf(buf, 1024, "mysql -uroot -h127.0.0.1 -P%s -p123 < %s > log", argv[1], argv[2]);
 	exec_spd("system", system, buf);
 }

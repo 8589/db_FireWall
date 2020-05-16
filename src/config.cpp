@@ -9,3 +9,9 @@ std::string db_name;
 int time_out = 60;
 int listen_queue_size = 1024;
 int default_level=0;
+int server_port;
+int firewall_port;
+int ui_comm_port;
+
+
+int buffsize = 1024;
