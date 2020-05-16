@@ -22,7 +22,7 @@ bool naive_filter::is_legal_and_add_log(const string &user, const string &_sql, 
 	log_illegal(user, _sql, ip);
 	return 0;
 }
-
+ 
 bool naive_filter::is_legal(const string &user, const string &_sql, const string &ip){
 	string sql;
 	int res = false;

@@ -55,6 +55,10 @@ void naive_sql_parser::parse_sql_level_0(string _sql, string &rule)
 					s += str[i];
 			}
 			rule += s;
+		}else if(ret == QUOTE){
+			rule += "\\\"";
+		}else if(ret == BACKSLASH){
+			rule += "\\\\";
 		}
 		else
 			rule += (sp->YYText());			//ss << (sp->YYText());
@@ -74,7 +78,11 @@ void naive_sql_parser::parse_sql_level_1(string _sql, string &rule)
 		if(ret == EMPTY)			rule += " ";	//ss << " ";
 		else if(ret == NUMBER)		rule += NUM_SIG;	//ss << "num";
 		else if(ret == STRING) 		rule += STR_SIG;	//ss << "str";
-		else
+		else if(ret == QUOTE){
+			rule += "\\\"";
+		}else if(ret == BACKSLASH){
+			rule += "\\\\";
+		}else
 			rule +=(sp->YYText());		//ss << (sp->YYText());
 	}
 	//ss >> rule;
@@ -93,7 +101,11 @@ void naive_sql_parser::parse_sql_level_2(string _sql, string &rule)
 		if(ret == EMPTY)			rule += " ";	//ss << " ";
 		else if(ret == NUMBER)		rule += NUM_SIG;	//ss << "num";
 		else if(ret == STRING) 		rule += STR_SIG;	//ss << "str";
-		else if(ret == ID)
+		else if(ret == QUOTE){
+			rule += "\\\"";
+		}else if(ret == BACKSLASH){
+			rule += "\\\\";
+		}else if(ret == ID)
 		{
 			if(last==DESC || last==TABLE || last==FROM || last==INTO || last==UPDATE || last==ON || last==-1 || last==VIEW || last==REFERENCES
 				||(last==COMMA && llast==TAB) || last == JOIN || (last==ID&&llast==TAB))
@@ -148,7 +160,11 @@ void naive_sql_parser::parse_sql_level_3(string _sql, string &rule)
 		if(ret == EMPTY)			rule += " ";	//ss << " ";
 		else if(ret == NUMBER)		rule += NUM_SIG;	//ss << "num";
 		else if(ret == STRING) 		rule += STR_SIG;	//ss << "str";
-		else if(ret == ID)
+		else if(ret == QUOTE){
+			rule += "\\\"";
+		}else if(ret == BACKSLASH){
+			rule += "\\\\";
+		}else if(ret == ID)
 		{
 			if(last==DESC || last==TABLE || last==FROM || last==INTO || last==UPDATE || last==ON || last==-1 || last==VIEW || last==REFERENCES
 				|| (last==COMMA && llast==TAB) || last == JOIN || (last==ID&&llast==TAB))

@@ -190,6 +190,7 @@ using namespace std;
 #define FOR 		155
 #define REVOKE 		156
 #define AT 			157
+#define QUOTE		158
 
 
 #define TAB_DOT_COL	158
@@ -213,6 +214,7 @@ using namespace std;
 [ \t\n\r]+						{return EMPTY;}
 \"(\\\"|[^"])*\"				{return STRING;}
 \'(\\\'|[^'])*\'				{return STRING;}
+\"								{return QUOTE;}
 [.] 							{return DOT;}
 (?i:CREATE)						{return CREATE;}
 (?i:GRANTS)						{return GRANTS;}

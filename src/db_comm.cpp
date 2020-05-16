@@ -158,8 +158,8 @@ int DBComm::IsMsgValid(){
 	if(msg.size() < 5){
 		return 0;
 	}
-	string sql = string(msg, 5, msg.size()-5);
-printf("%s\n", sql.c_str());
+	sql = string(msg, 5, msg.size()-5);
+//printf("%s\n", sql.c_str());
 	if(is_learning){
 		ftr->add_white_list(user, sql, ip);
 	}else{
@@ -169,9 +169,10 @@ printf("%s\n", sql.c_str());
 }
 
 
-void DBComm::handleIllegalMsg(){
-printf("user : %s\n ip : %s\n, SQL : %s", user.c_str(), ip.c_str(), string(msg, 5, msg.size()-5).c_str());
-	ftr->log_illegal(user, string(msg, 5, msg.size()-5), ip);
+inline void DBComm::handleIllegalMsg(){
+//printf("user : %s\n ip : %s\n, SQL : %s", user.c_str(), ip.c_str(), sql.c_str());
+	if(is_log_illegal_query)
+		ftr->log_illegal(user, sql, ip);
 }
 
 int DBComm::login(){
@@ -243,6 +244,6 @@ void DBComm::handleDBConnection(){
 	if(login() < 0){
 		return;
 	}
-printf("a connection from %s, user is %s\n", ip.c_str(), user.c_str());
+//printf("a connection from %s, user is %s\n", ip.c_str(), user.c_str());
 	epollCommunicate();
 }

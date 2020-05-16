@@ -27,3 +27,6 @@ target_link_libraries(generator CJsonObject base_sql_parser  db_firewall mysqlcl
 add_executable(test_spd test_spd.cpp)
 target_link_libraries(test_spd CJsonObject base_sql_parser  db_firewall mysqlclient z c dl)
 
+add_executable(test_parser test_parser.cpp)
+target_link_libraries(test_parser CJsonObject base_sql_parser  db_firewall mysqlclient z c dl)
+

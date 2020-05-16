@@ -10,6 +10,7 @@
 
 using namespace std;
 extern atomic<bool> is_learning;
+extern int is_log_illegal_query;
 
 
 void handleDBConnection(int clientFd, sockaddr_in clientAddr);
@@ -21,6 +22,7 @@ private:
 	string user;
 	string ip;
 	string msg;
+	string sql;
 
 
 	int clientFd;
@@ -66,7 +68,7 @@ public:
 		if(clientFd >= 0)	close(clientFd);
 		if(serverFd >= 0)	close(serverFd);
 		if(epFd >= 0)	close(epFd);
-printf("close a connection from %s, user is %s\n", ip.c_str(), user.c_str());
+//printf("close a connection from %s, user is %s\n", ip.c_str(), user.c_str());
 	}
 
 	void handleDBConnection();

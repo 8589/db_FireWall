@@ -218,6 +218,7 @@ extern int is_log_illegal_query;
 #define FOR 		155
 #define REVOKE 		156
 #define AT 			157
+#define QUOTE		158
 
 #define TAB_DOT_COL	158
 #define OUTER 		159

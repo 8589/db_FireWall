@@ -45,7 +45,6 @@ int test_db_config()
 
 int main(int argc, char** argv)
 {
-	
 	logger log;
 	ifstream fin("/etc/db_FireWall/db_FireWall.json");
 	string json;
