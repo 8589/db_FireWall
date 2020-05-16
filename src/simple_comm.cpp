@@ -16,7 +16,7 @@ int simple_comm::create_socket(int domain, int type, int protocol)
 	return 0;
 }
 
-
+ 
 
 
 void simple_comm::set_server(int domain, string addr, int port){

@@ -1,6 +1,10 @@
 #include "db_comm.h"
 #include <cstring>
+#include<sys/epoll.h>
+#include <iostream>
+#include <chrono>
 
+using namespace std;
 
 int db_comm::handle_db_connection()
 {
@@ -12,8 +16,11 @@ int db_comm::handle_db_connection()
 	string s;
 	while(1){
 		s.clear();
-		//int res = this->one_comm();
-		int res = this->select_one_comm(s);
+auto start_time = std::chrono::steady_clock::now();
+	int res = this->select_one_comm(s);
+auto end_time = std::chrono::steady_clock::now();
+auto duration = std::chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+std::cout << "The exec time of comm is : "<< duration.count() << "ms" << std::endl;
 		if(res < 0)
 			return -1;
 		if(!res)
@@ -69,7 +76,57 @@ int db_comm::login()
 	return 1;
 
 }
+int db_comm::select_one_comm(string& s)
+{
+	epoll_event tep1,tep2,ep[2];
+	int efd = epoll_create(2);
+	int ret = 0;
+	tep1.events = EPOLLIN;
+	tep1.data.fd = client_fd;
+	ret = epoll_ctl(efd,EPOLL_CTL_ADD,client_fd,&tep1);
+	tep2.data.fd = server.get_socket();
+	tep2.events = EPOLLIN;
+	ret = epoll_ctl(efd,EPOLL_CTL_ADD,server.get_socket(),&tep2);
 
+	
+	size_t res = 1;
+	while(1){
+auto start_time = std::chrono::steady_clock::now();
+		size_t res = epoll_wait(efd,ep,2,-1);
+		cout << "res is " << res << endl;
+		//int res = select(maxfd, &rset, nullptr, nullptr, &tv);
+
+		for(int i=0;i<res;i++){
+			if(ep[i].data.fd == client_fd){
+
+				cout << "client" << endl;
+				int _size = this->recv_a_packet(s, client_fd);
+				if(_size <= 0)
+					return _size;
+				if(check_sql(s) > 0){
+					if(server.send_msg(s.c_str(), s.size()) < 0)
+						return -1;
+				}else{
+					return -1;
+				}
+			}else{
+				cout << "server" << endl;
+				char t_buff[BUFFSIZE];
+				int _size = server.recv_msg();
+				server.read_msg(t_buff, _size);
+				if(_size <= 0)
+					return _size;
+				if(server.send_msg(client_fd, t_buff, _size) < 0)
+					return -1;
+			}
+		}
+auto end_time = std::chrono::steady_clock::now();
+auto duration = std::chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+std::cout << "The exec time of epoll is : "<< duration.count() << "ms" << std::endl;
+	}
+	return 1;
+}
+/*
 int db_comm::select_one_comm(string& s)
 {
 	fd_set rset;
@@ -79,7 +136,12 @@ int db_comm::select_one_comm(string& s)
 	int maxfd = std::max(client_fd, server.get_socket()) + 1;
 	timeval tv;
 	tv.tv_sec = 60;
+auto start_time = std::chrono::steady_clock::now();
 	int res = select(maxfd, &rset, nullptr, nullptr, &tv);
+auto end_time = std::chrono::steady_clock::now();
+auto duration = std::chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+std::cout << "The exec time of select is : "<< duration.count() << "ms" << std::endl;
+	
 	if(res < 0)
 		return -1;
 	if(res == 0){
@@ -89,7 +151,8 @@ int db_comm::select_one_comm(string& s)
 		return -1;
 	}
 	if(FD_ISSET(client_fd, &rset)){
-
+		cout << "client" << endl;
+auto start_time = std::chrono::steady_clock::now();
 		int _size = this->recv_a_packet(s, client_fd);
 		if(_size <= 0)
 			return _size;
@@ -99,11 +162,15 @@ int db_comm::select_one_comm(string& s)
 		}else{
 			return -1;
 		}
+auto end_time = std::chrono::steady_clock::now();
+auto duration = std::chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
+std::cout << "The exec time of client is : "<< duration.count() << "ms" << std::endl;
 			
 	}
 	if(FD_ISSET(server.get_socket(), &rset)){
 		// int _size = this->recv_a_packet(s, server.get_socket());
 		//add 3
+		cout << "server" << endl;
 		char t_buff[BUFFSIZE];
 		int _size = server.recv_msg();
 		server.read_msg(t_buff, _size);
@@ -117,6 +184,7 @@ int db_comm::select_one_comm(string& s)
 	}
 	return 1;
 }
+*/
 
 int db_comm::check_sql(string& recv_msg){
 	if(recv_msg.size() >= 5){

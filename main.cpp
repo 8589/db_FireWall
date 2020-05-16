@@ -129,22 +129,25 @@ int main(int argc, char** argv)
 
 	oJson.Get("default_level", default_level);
 
-	thread t1([&,server_port, firewall_port, ui_comm_port](){
-		firewall fw;
-		logger log;
-		log.high_debug("firewall start");
-		fw.start_firewall(server_port, firewall_port);
-	});
 	
-	thread t2([&,server_port, firewall_port, ui_comm_port](){
-		firewall fw;
-		logger log;
-		log.high_debug("web_UI start");
-		fw.comm_with_web_UI(server_port, ui_comm_port);
-	});
+	// thread t1([&,server_port, firewall_port, ui_comm_port](){
+	// 	firewall fw;
+	// 	logger log;
+	// 	log.high_debug("firewall start");
+	// 	fw.start_firewall(server_port, firewall_port);
+	// });
+	
+	// thread t2([&,server_port, firewall_port, ui_comm_port](){
+	// 	firewall fw;
+	// 	logger log;
+	// 	log.high_debug("web_UI start");
+	// 	fw.comm_with_web_UI(server_port, ui_comm_port);
+	// });
 
-	t2.join();
-	t1.join();
+	// t2.join();
+	// t1.join();
+	
+	start(server_port, firewall_port, ui_comm_port);
 	
 	return 0;
 }
