@@ -68,7 +68,8 @@ public:
 		if(clientFd >= 0)	close(clientFd);
 		if(serverFd >= 0)	close(serverFd);
 		if(epFd >= 0)	close(epFd);
-//printf("close a connection from %s, user is %s\n", ip.c_str(), user.c_str());
+if(LOG_LEVEL < 5)
+printf("[info]:close a connection from %s, user is %s\n", ip.c_str(), user.c_str());
 	}
 
 	void handleDBConnection();

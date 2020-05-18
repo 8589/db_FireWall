@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 2.8)
   
 
 PROJECT(db_FireWall CXX)
@@ -16,11 +16,16 @@ aux_source_directory(. db_FireWall_SRC)
 #execute_process(COMMAND bash ../mm)
 
 include_directories(
-	./include
+#	/usr/local/mysql/include/
+	${PROJECT_SOURCE_DIR}/include
 	/usr/include/mysql
-	)
+)
 
-link_directories(./lib)
+link_directories(
+#	/usr/local/mysql/lib
+	${PROJECT_SOURCE_DIR}/lib
+)
+
 add_subdirectory(src)
 add_subdirectory(test)
 

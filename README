@@ -137,7 +137,17 @@ v2.4.2
 	添加学习和过滤模式
 	效率未加4066 加了2312
 v2.4.3
-	 修改成非阻塞读写
+	修改成非阻塞读写
+	未加3651 不过滤3234 过滤1815效率处在过滤上
+
+v2.4.4
+	修改./CMakeLists.txt，修改cmake所需版本，把相对路径改为绝对路径，添加对mysql依赖的路径，可以通过注释include和lib的注释来获取安装的mysql中的头文件和库
+	修改./scripts/install.sh修改不正确的路径，不再使用rinetd
+	修改启动脚本,在启动脚本中添加端口转发的命令，并且增加启动和删除成功的提示语
+	client.php修改开启和关闭函数，不需要在此处管理转发功能
+	注释main函数读取缓冲大小和是否记录非法日志的语句
+	注释启动ui_comm的提示符
+	对db_comm中一些调试信息进行修改，改称和LOG_LEVEL有关，这里还需要改进。
 
 v3
 	TODO：网络模型修改为epoll+线程池，增加此法分析器，修改日志库，修改数据库
@@ -168,6 +178,11 @@ v3
 v3.0.1
 	实现用epoll单线程转发
 
+
+依赖库
+libmysqlclient，可以通过安装libmysqlclient-dev或者-L/usr/local/mysql/lib来解决
+zlib	通过apt install zlib1g-dev
+flex	apt install flex
 
 转发命令
 sudo iptables -t nat -A PREROUTING -p tcp --dport 3306 -j REDIRECT --to-ports 6666

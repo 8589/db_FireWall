@@ -1,7 +1,7 @@
 #!/bin/bash
 
 start(){
-echo "start"
+#echo "start"
 echo "input user:"
 read user
 echo "input password:"
@@ -9,6 +9,7 @@ stty -echo
 read password
 stty echo
 nohup echo "$user $password"|/bin/db_FireWall > /etc/db_FireWall/db_FireWall.log 2>&1 &
+sudo iptables -t nat -A PREROUTING -p tcp --dport 3306 -j REDIRECT --to-ports 6666
 echo "db_FireWall start"
 }
 
@@ -24,6 +25,14 @@ do
                 fi
         done
 done
+index=`sudo iptables -t nat -nL --line-numbers | grep "3306" | awk '{print $1}' | sort -nr`
+for i in $index
+do
+		#echo $i
+		#echo "sudo iptables -t nat -D PREROUTING $i"
+		sudo iptables -t nat -D PREROUTING $i
+done
+echo "db_FireWall stop"
 }
 
 

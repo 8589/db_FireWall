@@ -19,21 +19,21 @@ class fw_comm
    		$this->close_conn();
    }
    public function open_firewall($user, $password){
-   		$cmd = "nohup pkill rinetd &";
-   		exec($cmd, $array, $ret);
-   		if($ret != 0){
-   			return 0;
-   		}
+   		// $cmd = "nohup pkill rinetd &";
+   		// exec($cmd, $array, $ret);
+   		// if($ret != 0){
+   		// 	return 0;
+   		// }
    		$cmd = "echo '".$user." ".$password."'|nohup /etc/init.d/db_FireWall start &";
    		exec($cmd, $array, $ret);
    		return $ret == 0;
    }
    public function close_firewall(){
-   		$cmd = "nohup /etc/init.d/db_FireWall stop &";
-   		exec($cmd, $array, $ret);
-   		if($ret != 0){
-   			return 0;
-   		}
+   		// $cmd = "nohup /etc/init.d/db_FireWall stop &";
+   		// exec($cmd, $array, $ret);
+   		// if($ret != 0){
+   		// 	return 0;
+   		// }
    		$cmd = "nohup rinetd -c /etc/rinetd.conf &";
    		exec($cmd, $array, $ret);
    		return $ret == 0;
@@ -232,8 +232,8 @@ class fw_comm
 }
 
 
-$client = new fw_comm("127.0.0.1",6667);
-echo $client->switch_mode(1);
+//$client = new fw_comm("127.0.0.1",6667);
+//echo $client->switch_mode(1);
 
 //print_r($client->query_firewall());
 //print_r($client->open_firewall("root", "123456"));

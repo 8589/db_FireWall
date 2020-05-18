@@ -140,7 +140,6 @@ int main(int argc, char** argv)
 	}
 	oJson.Get("is_log_illegal_query", is_log_illegal_query);
 
-printf("%d %d\n", buffsize, is_log_illegal_query);
 	
 	// thread t1([](){
 	// 	firewall fw;
@@ -152,8 +151,8 @@ printf("%d %d\n", buffsize, is_log_illegal_query);
 	
 	thread t2([](){
 		firewall fw;
-		logger log;
-		log.high_debug("web_UI start");
+		//logger log;
+		//log.high_debug("web_UI start");
 		fw.comm_with_web_UI(server_port, ui_comm_port);
 	});
 

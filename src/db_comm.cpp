@@ -58,7 +58,8 @@ static int IsMsgValid(const string& msg, filter* ftr, const UserInfo &userInfo){
 		return 0;
 	}
 	string sql = string(msg, 5, msg.size()-5);
-printf("%s\n", sql.c_str());
+
+//printf("%s\n", sql.c_str());
 	if(is_learning){
 		ftr->add_white_list(userInfo.user, sql, userInfo.ip);
 	}else{
@@ -69,7 +70,7 @@ printf("%s\n", sql.c_str());
 
 
 static void handleIllegalMsg(const string& msg, filter* ftr, const UserInfo &userInfo){
-printf("user : %s\n ip : %s\n, SQL : %s", userInfo.user.c_str(), userInfo.ip.c_str(), string(msg, 5, msg.size()-5).c_str());
+//printf("user : %s\n ip : %s\n, SQL : %s", userInfo.user.c_str(), userInfo.ip.c_str(), string(msg, 5, msg.size()-5).c_str());
 	ftr->log_illegal(userInfo.user, string(msg, 5, msg.size()-5), userInfo.ip);
 }
 
@@ -139,7 +140,8 @@ void handleDBConnection(int clientFd, sockaddr_in clientAddr){
 	if(login(clientFd, serverFd, upBuf.get(), buffsize, userInfo.user) < 0){
 		return;
 	}
-printf("a connection from %s, user is %s\n", userInfo.ip.c_str(), userInfo.user.c_str());
+if(LOG_LEVEL < 5)
+printf("[info]:a connection from %s, user is %s\n", userInfo.ip.c_str(), userInfo.user.c_str());
 	epollCommunicate(clientFd, serverFd, upBuf.get(), buffsize, userInfo);
 }
 
@@ -159,11 +161,14 @@ int DBComm::IsMsgValid(){
 		return 0;
 	}
 	sql = string(msg, 5, msg.size()-5);
-//printf("%s\n", sql.c_str());
+if(LOG_LEVEL < 3)
+printf("[high debug]:%s\n", sql.c_str());
 	if(is_learning){
 		ftr->add_white_list(user, sql, ip);
 	}else{
-		return ftr->is_legal(user, sql, ip);
+		//ftr->is_legal(user, sql, ip);
+		//return 1;
+		//return ftr->is_legal(user, sql, ip);
 	}
 	return 1;
 }
@@ -215,11 +220,13 @@ void DBComm::epollCommunicate(){
 				if(msgSize <= 0){
 					return;
 				}
+				
 				if(!IsMsgValid()){
 					//TODO
 					handleIllegalMsg();
 					return;
 				}
+				
 				msgSize = send(serverFd, msg.c_str(), msgSize, 0);
 				if(msgSize <= 0){
 					return;
