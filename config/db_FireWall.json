@@ -6,7 +6,7 @@
 
 "is_learning":1,
 
-"LOG_LEVEL":2,
+"LOG_LEVEL":"info",
 "db_user":null,
 "db_password":null,
 "db_name":"mysql",

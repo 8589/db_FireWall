@@ -8,7 +8,7 @@ echo "input password:"
 stty -echo
 read password
 stty echo
-nohup echo "$user $password"|/bin/db_FireWall > /etc/db_FireWall/db_FireWall.log 2>&1 &
+nohup /bin/db_FireWall -u$user -p$password >/etc/db_FireWall/error.log 2>&1 & 
 sudo iptables -t nat -A PREROUTING -p tcp --dport 3306 -j REDIRECT --to-ports 6666
 echo "db_FireWall start"
 }

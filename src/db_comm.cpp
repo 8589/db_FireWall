@@ -8,8 +8,6 @@
 #include "filter.h"
 #include "naive_filter.h"
 #include "naive_sql_parser.h"
-
-
 #include "utils.h"
 
 using namespace std;
@@ -29,156 +27,60 @@ static int transmitOnce(int clientFd, int serverFd, char *buf, int bufSize){
 	return recvSize;
 }
 
-
-/*************************************function***********************************/
-struct UserInfo{
-	string user;
-	string ip;
-	UserInfo(const string &user_ = "", const string &ip_ = "") : user(user_), ip(ip_){}
-};
-
-
-static int login(int clientFd, int serverFd, char *buf, int bufSize, string &user){
-	if(transmitOnce(clientFd, serverFd, buf, bufSize) <= 0){
-		return -1;
-	}
-	if(transmitOnce(serverFd, clientFd, buf, bufSize) <= 0){
-		return -1;
-	}
-	user.clear();
-	user = string(buf + 36);
-	if(transmitOnce(clientFd, serverFd, buf, bufSize) <= 0){
-		return -1;
-	}
-	return 1;
-}
-
-static int IsMsgValid(const string& msg, filter* ftr, const UserInfo &userInfo){
-	if(msg.size() < 5){
-		return 0;
-	}
-	string sql = string(msg, 5, msg.size()-5);
-
-//printf("%s\n", sql.c_str());
-	if(is_learning){
-		ftr->add_white_list(userInfo.user, sql, userInfo.ip);
-	}else{
-		return ftr->is_legal(userInfo.user, sql, userInfo.ip);
-	}
-	return 1;
-}
-
-
-static void handleIllegalMsg(const string& msg, filter* ftr, const UserInfo &userInfo){
-//printf("user : %s\n ip : %s\n, SQL : %s", userInfo.user.c_str(), userInfo.ip.c_str(), string(msg, 5, msg.size()-5).c_str());
-	ftr->log_illegal(userInfo.user, string(msg, 5, msg.size()-5), userInfo.ip);
-}
-
-
-static int epollCommunicate(int clientFd, int serverFd, char *buf, int bufSize, const UserInfo& userInfo){
-	int epFd = epoll_create(2);
-	if(epFd < 0){
-		return -1;
-	}
-	FdGuard epFdGuard(epFd);
-
-	if(epollAddFd(epFd, clientFd) < 0){
-		return -1;
-	}
-	if(epollAddFd(epFd, serverFd) < 0){
-		return -1;
-	}
-
-	epoll_event events[2];
-	unique_ptr<filter> upFilter( new naive_filter ( shared_ptr<sql_parser>(new naive_sql_parser) ));
-
-	while(1){
-		int eventSize = epoll_wait(epFd, events, 2, -1);
-		for(int i =0; i < eventSize; i ++){
-			int thisFd = events[i].data.fd;
-			if(thisFd == clientFd){
-				string msg;
-				int msgSize = recvAMsg(thisFd, msg);
-				if(msgSize <= 0){
-					return -1;
-				}
-				//check()
-				if(!IsMsgValid(msg, upFilter.get(), userInfo)){
-					//TODO
-					handleIllegalMsg(msg, upFilter.get(), userInfo);
-					return -1;
-				}
-				msgSize = send(serverFd, msg.c_str(), msgSize, 0);
-				if(msgSize <= 0){
-					return -1;
-				}
-			}else{
-				if(transmitOnce(clientFd, serverFd, buf, bufSize) <= 0){
-					return -1;
-				}
-			}
-		}
-	}
-	return 1;
-}
-
-void handleDBConnection(int clientFd, sockaddr_in clientAddr){
-	FdGuard clientFdGuard(clientFd);
-	int serverFd = getTCPClient_r("127.0.0.1", server_port);
-	if(serverFd < 0){
-		return;
-	}
-	FdGuard serverFdGuard(serverFd);
-	unique_ptr<char[]> upBuf(new char[buffsize]);
-	UserInfo userInfo;
-	char ipBuf[16];
-	const char *result = inet_ntop(AF_INET, &clientAddr.sin_addr, ipBuf, INET_ADDRSTRLEN);
-	if(!result){
-		userInfo.ip = "unknown host";
-	}
-	userInfo.ip = result;
-	if(login(clientFd, serverFd, upBuf.get(), buffsize, userInfo.user) < 0){
-		return;
-	}
-if(LOG_LEVEL < 5)
-printf("[info]:a connection from %s, user is %s\n", userInfo.ip.c_str(), userInfo.user.c_str());
-	epollCommunicate(clientFd, serverFd, upBuf.get(), buffsize, userInfo);
-}
-
-
-
-
-
-
-
-
-
-
-
 /*************************************class***********************************/
+
+inline void DBComm::init(){
+	clientFd = -1;
+	serverFd = -1;
+	epFd = -1;
+	ftr = nullptr;
+	buf = nullptr;
+	bufSize = 0;
+	ip = "unknown host";
+}
+
+DBComm::DBComm(int clientFd_, sockaddr_in clientAddr){
+	init();
+	clientFd = clientFd_;
+	char ipBuf[INET_ADDRSTRLEN];
+	const char *result = inet_ntop(AF_INET, &clientAddr.sin_addr, ipBuf, INET_ADDRSTRLEN);
+	if(result){
+		ip = result;
+	}
+}
+
+
+DBComm::~DBComm(){
+	delete[] buf;
+	delete ftr;
+	if(clientFd >= 0)	close(clientFd);
+	if(serverFd >= 0)	close(serverFd);
+	if(epFd >= 0)	close(epFd);
+	fwLogger->info("close a connection from {}, user is {}", ip, user);
+}
+
 int DBComm::IsMsgValid(){
 	if(msg.size() < 5){
 		return 0;
 	}
 	sql = string(msg, 5, msg.size()-5);
-if(LOG_LEVEL < 3)
-printf("[high debug]:%s\n", sql.c_str());
+fwLogger->debug("sql is {}", sql);
 	if(is_learning){
 		ftr->add_white_list(user, sql, ip);
 	}else{
 		//ftr->is_legal(user, sql, ip);
 		//return 1;
-		//return ftr->is_legal(user, sql, ip);
+		return ftr->is_legal(user, sql, ip);
 	}
 	return 1;
 }
 
 
 inline void DBComm::handleIllegalMsg(){
-//printf("user : %s\n ip : %s\n, SQL : %s", user.c_str(), ip.c_str(), sql.c_str());
 	if(is_log_illegal_query)
 		ftr->log_illegal(user, sql, ip);
 }
+
 
 int DBComm::login(){
 	if(transmitOnce(clientFd, serverFd, buf, bufSize) <= 0){
@@ -194,23 +96,26 @@ int DBComm::login(){
 	}
 	return 1;
 }
+
+
 void DBComm::epollCommunicate(){
 	epFd = epoll_create(2);
 	if(epFd < 0){
+		myPinrtWarn("epoll_create");
 		return;
 	}
 
 	if(epollAddFd(epFd, clientFd) < 0){
+		myPinrtWarn("epollAddFd");
 		return;
 	}
 	if(epollAddFd(epFd, serverFd) < 0){
+		myPinrtWarn("epollAddFd");
 		return;
 	}
 
 	epoll_event events[2];
-	//TODO
 	ftr = new naive_filter ( shared_ptr<sql_parser>(new naive_sql_parser) );
-
 	while(1){
 		int eventSize = epoll_wait(epFd, events, 2, -1);
 		for(int i =0; i < eventSize; i ++){
@@ -220,13 +125,10 @@ void DBComm::epollCommunicate(){
 				if(msgSize <= 0){
 					return;
 				}
-				
 				if(!IsMsgValid()){
-					//TODO
 					handleIllegalMsg();
 					return;
 				}
-				
 				msgSize = send(serverFd, msg.c_str(), msgSize, 0);
 				if(msgSize <= 0){
 					return;
@@ -241,16 +143,19 @@ void DBComm::epollCommunicate(){
 }
 
 void DBComm::handleDBConnection(){
-	serverFd = getTCPClient_r("127.0.0.1", server_port);
+	serverFd = getTCPClient_w("127.0.0.1", server_port);
 	if(serverFd < 0){
+		myPinrtWarn("getTCPClient_w");
 		return;
 	}
 	//exception
 	buf = new char[buffsize];
 	bufSize = buffsize;
 	if(login() < 0){
+		myPinrtWarn("login");
 		return;
 	}
-//printf("a connection from %s, user is %s\n", ip.c_str(), user.c_str());
+fwLogger->info("a connection from {}, user is {}", ip, user);
 	epollCommunicate();
 }
+

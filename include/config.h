@@ -3,11 +3,11 @@
 
 #include <atomic>
 #include <string>
-
+#include "spdlog/sinks/rotating_file_sink.h"
 
 
 extern std::atomic<bool> is_learning;
-extern int LOG_LEVEL;
+extern std::string LOG_LEVEL;
 extern std::string db_user;
 extern std::string db_password;
 extern std::string db_name;
@@ -20,11 +20,13 @@ extern int ui_comm_port;
 extern int buffsize;
 extern int is_log_illegal_query;
 
+extern std::shared_ptr<spdlog::logger> fwLogger;
+
 
 
 #define	MAX_MSG_SIZE 	16777215
-#define MSGSIZE 		1024
-#define BUFFSIZE		1024
+#define MSGSIZE 		4096
+#define BUFFSIZE		4096
 
 
 #define COL 			2001

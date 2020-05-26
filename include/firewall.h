@@ -24,8 +24,6 @@ void start(int db_server_port, int firewall_port, int ui_comm_port);
 void startFireWall();
 
 
-
-
 class firewall
 {
 private:

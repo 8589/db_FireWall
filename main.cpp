@@ -6,22 +6,14 @@
 #include <dlfcn.h>
 #include <iostream>
 #include <unistd.h>
+#include <getopt.h>
+
+#include "spdlog/spdlog.h"
+
+
 using namespace std;
 using namespace neb;
 
-extern atomic<bool> is_learning;
-extern int LOG_LEVEL;
-extern std::string db_user;
-extern std::string db_password;
-extern std::string db_name;
-extern int time_out;
-extern int listen_queue_size;
-extern int default_level;
-extern int server_port;
-extern int firewall_port;
-extern int ui_comm_port;
-extern int buffsize;
-extern int is_log_illegal_query;
 
 
 #define TTY_PATH 			"/dev/tty"
@@ -34,132 +26,209 @@ extern int is_log_illegal_query;
 
 int test_db_config()
 {
-	logger log;
 	MYSQL *conn = mysql_init(NULL);
 	if (!mysql_real_connect(conn,"127.0.0.1",db_user.c_str(),db_password.c_str(),db_name.c_str(),0,NULL,CLIENT_MULTI_RESULTS)){
-		log.error(mysql_error(conn));
+		fwLogger->error(mysql_error(conn));
 		exit(1);
 	}
+    mysql_close(conn);
+}
+
+void initLogger(){
+    try{
+        fwLogger = spdlog::rotating_logger_mt("fwLogger", "/etc/db_FireWall/db_FireWall.log", 1024 * 1024 * 128, 16);
+    }catch (const spdlog::spdlog_ex& ex){
+        std::cerr << "Logger initialization failed: " << ex.what() << std::endl;
+        exit(-1);
+    }
+}
+
+void checkServerPort(int serverPort){
+    if(server_port < 0 || server_port > 65535){
+        fwLogger->error("server_port should be in [0,65535]");
+        exit(-3);
+    }
+}
+
+void checkFwPort(int fwPort){
+    if(firewall_port < 0 || firewall_port > 65535){
+        fwLogger->error("firewall_port should be in [0,65535]");
+        exit(-4);
+    }
+    if(fwPort == server_port){
+        fwLogger->error(("firewall_port and server_port are same!"));
+        exit(-5);
+    }
+}
+
+void checkUICommPort(int uiCommPort){
+    if(uiCommPort < 0 || uiCommPort > 65535){
+        fwLogger->error("ui_comm_port should be in [0,65535]");
+        exit(-6);
+    }
+    if(uiCommPort == server_port){
+        fwLogger->error(("ui_comm_port and server_port are same!"));
+        exit(-7);
+    }
+    if(uiCommPort == firewall_port){
+        fwLogger->error(("ui_comm_port and firewall_port are same!"));
+        exit(-8);
+    }
+}
+
+void checkBuffSize(int buffSize){
+    if(buffSize <= 0 || buffSize >= (1<<24)){
+        fwLogger->error("buffsize is too big(>16M) or too small(<0)");
+        exit(-9);
+    }
+}
+
+CJsonObject getJson(const std::string configFile){
+    std::ifstream fin(configFile);
+    string config;
+    if(!fin.is_open()){
+        fwLogger->error("Cannot open config file");
+        exit(-2);
+    }
+    string str_;
+    while(getline(fin, str_)){
+        config += str_;
+    }
+    return CJsonObject(config);
+}
+
+void getDBConfig(const CJsonObject &oJson){
+    if(db_user.empty()){
+        if(oJson.IsNull("db_user")){
+            fwLogger->error("db_user cannot be empty!");
+            exit(-11);
+        }else{
+            oJson.Get("db_user", db_user);
+        }
+    }
+
+    if(db_password.empty()){
+        if(oJson.IsNull("db_password")){
+            std::cout << "input db_password:" << std::endl;
+            system(STTY_CLOSE TTY_PATH);
+            cin >> db_password;
+            system(STTY_OPEN TTY_PATH);
+        }else{
+            oJson.Get("db_password", db_password);
+        }
+    }
+
+    if(db_name.empty()){
+        if(oJson.IsNull("db_name")){
+            fwLogger->error("db_name cannot be empty!");
+            exit(-12);
+        }else{
+            oJson.Get("db_name", db_name);
+        }
+    }
+    test_db_config();
 }
 
 
+void setLogLevel(const std::string logLevel){
+    if(logLevel == "trace"){
+        fwLogger->set_level(spdlog::level::trace);
+    }else if(logLevel == "debug"){
+        fwLogger->set_level(spdlog::level::debug);
+    }else if(logLevel == "info"){
+        fwLogger->set_level(spdlog::level::info);
+    }else if(logLevel == "warn"){
+        fwLogger->set_level(spdlog::level::warn);
+    }else if(logLevel == "error"){
+        fwLogger->set_level(spdlog::level::err);
+    }else if(logLevel == "critical"){
+        fwLogger->set_level(spdlog::level::critical);
+    }else{
+        fwLogger->set_level(spdlog::level::off);
+    }
+}
+
+void readConfigFile(const CJsonObject &oJson){
+
+    oJson.Get("server_port", server_port);
+    checkServerPort(server_port);
+
+    oJson.Get("firewall_port", firewall_port);
+    checkFwPort(firewall_port);
+
+    oJson.Get("ui_comm_port", ui_comm_port);
+    checkUICommPort(ui_comm_port);
+
+    int isLearning_;
+    oJson.Get("is_learning", isLearning_);
+    is_learning.store(isLearning_);
+
+    oJson.Get("LOG_LEVEL", LOG_LEVEL);
+    setLogLevel(LOG_LEVEL);
+
+    oJson.Get("time_out", time_out);
+    oJson.Get("listen_queue_size", listen_queue_size);
+
+    oJson.Get("default_level", default_level);
+    oJson.Get("buffsize", buffsize);
+
+    checkBuffSize(buffsize);
+
+    oJson.Get("is_log_illegal_query", is_log_illegal_query);
+
+}
+
+
+int parseCMDParameter(int argc, char **argv){
+    int opt;
+    int isInit = 0;
+    const char *optstring = "u:p:d:i";
+    while( (opt = getopt(argc, argv, optstring)) != -1 ){
+        switch (opt){
+            case 'u' : db_user = optarg; break;
+            case 'p' : db_password = optarg; break;
+            case 'd' : db_name = optarg; break;
+            case 'i' : isInit = 1; break;
+            default : break;
+        }
+    }
+    return isInit;
+}
+
 int main(int argc, char** argv)
 {
-	logger log;
-	ifstream fin("/etc/db_FireWall/db_FireWall.json");
-	string json;
-	string _s;
-	while(getline(fin, _s))
-	{
-		json += _s;
-	}
 
-	CJsonObject oJson(json);
+    initLogger();
 
-	
-	oJson.Get("server_port", server_port);
-	if(server_port < 0 || server_port > 65535)
-	{
-		log.error("server_port should be in [0,65535]");
-		exit(0);
-	}
-
-	
-	oJson.Get("firewall_port",firewall_port);
-	if(firewall_port < 0 || firewall_port > 65535)
-	{
-		log.error("firewall_port should be in [0,65535]");
-		exit(0);
-	}
-
-	
-	oJson.Get("ui_comm_port", ui_comm_port);
-	if(ui_comm_port < 0 || ui_comm_port > 65535)
-	{
-		log.error("ui_comm_port should be in [0,65535]");
-		exit(0);
-	}
-
-	if(server_port == firewall_port || server_port == ui_comm_port || firewall_port == ui_comm_port)
-	{
-		log.error("ports cannot be same!!");
-		exit(0);
-	}
-
-	int _is_learning;
-	oJson.Get("is_learning", _is_learning);
-	is_learning.store(bool(_is_learning));
-
-	oJson.Get("LOG_LEVEL", LOG_LEVEL);
+    int isInit = parseCMDParameter(argc, argv);
 
 
-	string user_key = "db_user";
-	if(oJson.IsNull(user_key))
-	{
-		printf("user:");
-		cin >> db_user;
-	}else
-	{
-		oJson.Get("db_user", db_user);
-	}
-	string pwd_key = "db_password";
-	if(oJson.IsNull(pwd_key))
-	{
-		system(STTY_CLOSE TTY_PATH);
-		printf("password:");
-		cin >> db_password;
-		system(STTY_OPEN TTY_PATH);
-		//db_password = string(getpass("password:"));
-	}else
-	{
-		oJson.Get("db_password", db_password);
-	}
-	
-	
-	oJson.Get("db_name",db_name);
-	test_db_config();
-	if(argc == 1);
-	else if(argc == 2 && !strcmp(argv[1], "init"))
-	{
-		naive_filter::init_db();
-		exit(0);
-	}else
-	{
-		fprintf(stderr, "<usage> : db_FireWall [init]\n");
-		exit(2);
-	}
+    CJsonObject oJson;
 
-	oJson.Get("time_out", time_out);
-	oJson.Get("listen_queue_size", listen_queue_size);
+    if(db_user.empty() || db_password.empty() || db_name.empty()){
+        oJson = getJson("/etc/db_FireWall/db_FireWall.json");
+        getDBConfig(oJson);
+    }
 
-	oJson.Get("default_level", default_level);
-	oJson.Get("buffsize", buffsize);
-	if(buffsize <= 0 || buffsize >= (1<<24)){
-		fprintf(stderr, "buffsize is too big(>16M) or too small(<0)\n");
-		exit(1);
-	}
-	oJson.Get("is_log_illegal_query", is_log_illegal_query);
+    if(isInit){
+        naive_filter::init_db();
+        return 0;
+    }
+    
+    readConfigFile(oJson);
 
-	
-	// thread t1([](){
-	// 	firewall fw;
-	// 	logger log;
-	// 	log.high_debug("firewall start");
-	// 	fw.start_firewall(server_port, firewall_port);
-	// });
 	thread t1(startFireWall);
 	
 	thread t2([](){
 		firewall fw;
-		//logger log;
-		//log.high_debug("web_UI start");
 		fw.comm_with_web_UI(server_port, ui_comm_port);
 	});
+
+    fwLogger->info("database firewall start");
 
 	t2.join();
 	t1.join();
 	
-	 //start(server_port, firewall_port, ui_comm_port);
-	
 	return 0;
+    
 }

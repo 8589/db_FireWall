@@ -3,9 +3,10 @@
 #include <cstdio>
 #include <string>
 using namespace std;
-extern int LOG_LEVEL;
+
 class logger
 {
+	int LOG_LEVEL = 2;
 public:
 	void error(string msg);
 

@@ -12,13 +12,18 @@
 using namespace std;
 
 inline void myPrintError(const string &func){
-	printf("%s() error:%s(errno:%d)\n", func.c_str(), strerror(errno), errno);
+	fwLogger->error("{}() error:{}(errno:{})", func, strerror(errno), errno);
+}
+
+inline void myPinrtWarn(const string &func){
+	fwLogger->warn("{}() error:{}(errno:{})", func, strerror(errno), errno);
 }
 
 inline void myExit(const string &func){
 	myPrintError(func);
 	exit(-1);
 }
+
 
 static void setAddr_e(sockaddr_in *addr, int domain, const string &ip, int port){
 	memset(addr, 0, sizeof(sockaddr_in));
@@ -32,14 +37,16 @@ static void setAddr_e(sockaddr_in *addr, int domain, const string &ip, int port)
 	}
 	addr->sin_port = htons(port);
 }
-static int setAddr_r(sockaddr_in *addr, int domain, const string &ip, int port){
+
+
+static int setAddr_w(sockaddr_in *addr, int domain, const string &ip, int port){
 	memset(addr, 0, sizeof(sockaddr_in));
 	addr->sin_family = domain;
 	if(ip.empty()){
 		addr->sin_addr.s_addr = htonl(INADDR_ANY);
 	}else{
 		if(inet_pton(AF_INET, ip.c_str(), &(addr->sin_addr)) != 1){
-			myPrintError("inet_pton");
+			myPinrtWarn("inet_pton");
 			return -1;
 		}
 	}
@@ -67,27 +74,27 @@ int getTCPServer_e(const string &ip, int port, int queueSize){
 	return fd;
 }
 
-int getTCPServer_r(const string &ip, int port, int queueSize){
+int getTCPServer_w(const string &ip, int port, int queueSize){
 	int fd = socket(AF_INET, SOCK_STREAM, 0);
 	if(fd < 0){
-		myPrintError("socket");
+		myPinrtWarn("socket");
 		return -1;
 	}
 	sockaddr_in addr;
-	if(setAddr_r(&addr, AF_INET, ip, port)){
+	if(setAddr_w(&addr, AF_INET, ip, port)){
 		return -1;
 	}
 	int on = 1;
 	if(setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on))){
-		myPrintError("setsockopt");
+		myPinrtWarn("setsockopt");
 		return -1;
 	}
 	if(bind(fd, (sockaddr*)&(addr), sizeof(sockaddr_in))){
-		myPrintError("setsockopt");
+		myPinrtWarn("setsockopt");
 		return -1;
 	}
 	if(listen(fd, queueSize)){
-		myPrintError("listen");
+		myPinrtWarn("listen");
 		return -1;
 	}
 	return fd;
@@ -108,18 +115,18 @@ int getTCPClient_e(const string &ip, int port){
 }
 
 
-int getTCPClient_r(const string &ip, int port){
+int getTCPClient_w(const string &ip, int port){
 	int fd = socket(AF_INET, SOCK_STREAM, 0);
 	if(fd < 0){
-		myPrintError("socket");
+		myPinrtWarn("socket");
 		return -1;
 	}
 	sockaddr_in addr;
-	if(setAddr_r(&addr, AF_INET, ip, port)){
+	if(setAddr_w(&addr, AF_INET, ip, port)){
 		return -1;
 	}
 	if(connect(fd, (sockaddr*)&(addr), sizeof(sockaddr_in))){
-		myPrintError("connect");
+		myPinrtWarn("connect");
 		return -1;
 	}
 	return fd;
