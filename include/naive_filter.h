@@ -6,20 +6,16 @@
 #include "filter.h"
 #include "connector.h"
 
-using namespace std;
-
-extern std::string db_user;
-extern std::string db_password;
-extern std::string db_name;
-extern int default_level;
 
 class naive_filter : public filter
 {
-private:
+protected:
 	simple_conn sc;
 
 public:
-	naive_filter(shared_ptr<sql_parser> _sp):filter(_sp){
+	using string = std::string;
+
+	naive_filter(std::shared_ptr<sql_parser> _sp):filter(_sp){
 		sc.connect_to("127.0.0.1",db_user.c_str(),db_password.c_str(),db_name.c_str());
 	}
 	virtual ~naive_filter(){

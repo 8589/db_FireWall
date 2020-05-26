@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 
 using namespace std;
+
 extern atomic<bool> is_learning;
 extern int is_log_illegal_query;
 

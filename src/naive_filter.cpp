@@ -1,7 +1,7 @@
 #include "naive_filter.h"
 
 #include <spdlog/fmt/fmt.h>
-
+#include <iostream>
 
 bool naive_filter::is_legal_and_add_log(const string &user, const string &_sql, const string &ip)
 {
@@ -14,8 +14,13 @@ bool naive_filter::is_legal_and_add_log(const string &user, const string &_sql, 
 
 bool naive_filter::is_legal(const string &user, const string &_sql, const string &ip){
 	int res = false;
+// auto start_time = std::chrono::steady_clock::now();
 	vector<string> rule(sp->level_size());
 	sp->parse_sql(_sql, rule);
+// auto end_time = std::chrono::steady_clock::now();
+// auto duration = std::chrono::duration_cast<chrono::microseconds>(end_time - start_time);
+// std::cout << "The exec time parse_sql() is : "<< duration.count() << "ms" << std::endl;
+	
 	//if(!(query_is_illegal(user, rule, ip)) && query_is_legal(user, rule, ip))
 	return query_is_legal(user, rule, ip);
 }
@@ -43,15 +48,24 @@ bool naive_filter::query_is_illegal(const string &user, vector<string>& rule, co
 
 bool naive_filter::query_is_legal(const string &user, vector<string>& rule, const string &ip)
 {
+// auto start_time = std::chrono::steady_clock::now();
 	vector< vector<string> > ans;
 	string query_sql = fmt::format(
 		"select id from white_list where rule in (\"{}\",\"{}\",\"{}\",\"{}\")"
 		"and ((level&8) or addr_ip=\"{}\") and ((level&16) or user=\"{}\") and flag=1 limit 1;",
 		rule[0], rule[1], rule[2], rule[3], ip, user
 		);
+// auto end_time = std::chrono::steady_clock::now();
+// auto duration = std::chrono::duration_cast<chrono::microseconds>(end_time - start_time);
+// std::cout << "The exec time format() is : "<< duration.count() << "ms" << std::endl;
+
+
 	fwLogger->debug(query_sql);
-	fwLogger->flush();
+// start_time = std::chrono::steady_clock::now();
 	ans = sc.query(query_sql.c_str());
+// end_time = std::chrono::steady_clock::now();
+// duration = std::chrono::duration_cast<chrono::microseconds>(end_time - start_time);
+// std::cout << "The exec time query() is : "<< duration.count() << "ms" << std::endl;
 	if(ans.size() > 0)
 		return true;
 	return false;
