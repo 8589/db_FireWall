@@ -10,6 +10,7 @@
 #include "naive_sql_parser.h"
 #include "utils.h"
 #include <chrono>
+#include "cached_naive_filter.h"
 
 using namespace std;
 
@@ -70,13 +71,9 @@ int DBComm::IsMsgValid(){
 	if(is_learning){
 		ftr->add_white_list(user, sql, ip);
 	}else{
-// auto start_time = std::chrono::steady_clock::now();
-	ftr->is_legal(user, sql, ip);
-// auto end_time = std::chrono::steady_clock::now();
-// auto duration = std::chrono::duration_cast<chrono::microseconds>(end_time - start_time);
-// std::cout << "The exec time is_legal() is : "<< duration.count() << "ms" << std::endl;
-		return 1;
-		//return ftr->is_legal(user, sql, ip);
+		//ftr->is_legal(user, sql, ip);
+		//return 1;
+		return ftr->is_legal(user, sql, ip);
 	}
 	return 1;
 }
@@ -121,36 +118,25 @@ void DBComm::epollCommunicate(){
 	}
 
 	epoll_event events[2];
+	//ftr = new cached_naive_filter( shared_ptr<sql_parser>(new naive_sql_parser) );
 	ftr = new naive_filter ( shared_ptr<sql_parser>(new naive_sql_parser) );
 	while(1){
 		int eventSize = epoll_wait(epFd, events, 2, -1);
 		for(int i =0; i < eventSize; i ++){
 			int thisFd = events[i].data.fd;
 			if(thisFd == clientFd){
-// auto start_time = std::chrono::steady_clock::now();
 				int msgSize = recvAMsg(thisFd, msg);
 				if(msgSize <= 0){
 					return;
 				}
-// auto end_time = std::chrono::steady_clock::now();
-// auto duration = std::chrono::duration_cast<chrono::microseconds>(end_time - start_time);
-// std::cout << "The exec time recvAMsg() is : "<< duration.count() << "ms" << std::endl;
-// start_time = std::chrono::steady_clock::now();
 				if(!IsMsgValid()){
 					handleIllegalMsg();
 					return;
 				}
-// end_time = std::chrono::steady_clock::now();
-// duration = std::chrono::duration_cast<chrono::microseconds>(end_time - start_time);
-// std::cout << "The exec time IsMsgValid() is : "<< duration.count() << "ms" << std::endl;
-// start_time = std::chrono::steady_clock::now();
 				msgSize = send(serverFd, msg.c_str(), msgSize, 0);
 				if(msgSize <= 0){
 					return;
 				}
-// end_time = std::chrono::steady_clock::now();
-// duration = std::chrono::duration_cast<chrono::microseconds>(end_time - start_time);
-// std::cout << "The exec time send() is : "<< duration.count() << "ms" << std::endl;
 			}else{
 				if(transmitOnce(clientFd, serverFd, buf, bufSize) <= 0){
 					return;

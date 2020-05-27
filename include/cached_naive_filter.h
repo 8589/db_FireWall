@@ -3,25 +3,27 @@
 
 
 #include "naive_filter.h"
-#include <map>
 #include <string>
+#include <unordered_set>
+#include <unordered_map>
 #include <set>
+
 
 
 class cached_naive_filter : public naive_filter{
 private:
+	using string = std::string;
 
-	std::map<std::string, std::map<std::string, std::set<std::string> > > white;
-	//std::map<std::string, std::map<std::string, std::set<std::string> > > black;
+	std::unordered_map< string, std::set< std::pair<std::string, std::string> > > white;
 
 
 public:
-	cached_naive_filter(shared_ptr<sql_parser> _sp) : naive_filter(_sp){
+	cached_naive_filter(std::shared_ptr<sql_parser> _sp) : naive_filter(_sp){
 		cache();
 	};
 	virtual ~cached_naive_filter(){};
 
-	virtual bool is_legal(const std::string &user, const string &_sql, const string &ip);
+	virtual bool is_legal(const std::string &user, const std::string &_sql, const std::string &ip);
 
 
 	void cache();
